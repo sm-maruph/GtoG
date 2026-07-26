@@ -1,0 +1,24 @@
+.emp-module{min-height:calc(100vh - var(--header-h));background:var(--theme-background);color:var(--theme-text)}
+.emp-content{max-width:1600px;margin:0 auto;padding:24px}
+.emp-summary{display:grid;grid-template-columns:repeat(2,minmax(180px,260px));gap:12px;margin-bottom:18px}
+.emp-summary>div{display:flex;align-items:center;gap:12px;padding:14px;background:var(--theme-card);border:1px solid var(--theme-border);border-radius:10px;color:var(--theme-primary)}
+.emp-summary span,.emp-summary strong{display:block}.emp-summary span{color:var(--theme-muted);font-size:11px}.emp-summary strong{color:var(--theme-heading);font-size:20px}
+.emp-filters{display:grid;grid-template-columns:minmax(260px,1fr) repeat(4,minmax(150px,190px));gap:9px;padding:12px;background:var(--theme-surface);border-bottom:1px solid var(--theme-border)}
+.emp-filters select,.emp-search{height:38px;border:1px solid var(--theme-border);border-radius:7px;background:var(--theme-card);color:var(--theme-text)}
+.emp-filters select{padding:0 9px}.emp-search{display:flex;align-items:center;gap:8px;padding:0 10px;color:var(--theme-muted)}
+.emp-search input{width:100%;border:0;outline:0;background:transparent;color:var(--theme-text)}
+.emp-table-wrap{width:100%;overflow:visible}.emp-table{width:100%;table-layout:fixed}.emp-table th,.emp-table td{text-align:left;overflow-wrap:anywhere}.emp-table td{vertical-align:middle}
+.emp-table th:nth-child(1){width:12%}.emp-table th:nth-child(2){width:20%}.emp-table th:nth-child(3){width:11%}.emp-table th:nth-child(4){width:19%}.emp-table th:nth-child(5){width:12%}.emp-table th:nth-child(6){width:13%}.emp-table th:nth-child(7){width:13%}
+.emp-table small{display:flex!important;align-items:center;gap:5px;color:var(--theme-muted);font-size:10px}.emp-table a{color:var(--theme-primary);text-decoration:none}.emp-table a:hover{text-decoration:underline}
+.emp-contact{display:flex;align-items:center;gap:5px;white-space:nowrap}.emp-actions{display:flex;align-items:center;gap:5px;white-space:nowrap}
+.emp-actions button{display:grid;place-items:center;width:30px;height:30px;border:1px solid var(--theme-border);border-radius:6px;background:var(--theme-surface);color:var(--theme-primary);cursor:pointer}.emp-actions button.danger{color:var(--theme-error)}
+.emp-module .ui-pagination{background:var(--theme-card);border-color:var(--theme-border)}
+.emp-detail-head{display:flex;align-items:center;gap:13px;padding:14px;margin-bottom:16px;border:1px solid var(--theme-border);border-radius:9px;background:var(--theme-surface)}
+.emp-detail-head>span{display:grid;place-items:center;width:46px;height:46px;border-radius:10px;background:var(--theme-primary-light);color:var(--theme-primary)}
+.emp-detail-head h3,.emp-detail-head p{margin:0}.emp-detail-head h3{color:var(--theme-heading);font-size:17px}.emp-detail-head p{margin-top:3px;color:var(--theme-muted);font-size:12px}
+.emp-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin:0;border:1px solid var(--theme-border);border-radius:9px;overflow:hidden}
+.emp-detail-grid>div{min-width:0;padding:12px 14px;border-bottom:1px solid var(--theme-border)}.emp-detail-grid>div:nth-child(odd){border-right:1px solid var(--theme-border)}.emp-detail-grid>div:nth-last-child(-n+2){border-bottom:0}
+.emp-detail-grid dt{margin-bottom:4px;color:var(--theme-muted);font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}.emp-detail-grid dd{margin:0;color:var(--theme-heading);font-size:12px;font-weight:600;overflow-wrap:anywhere}.emp-detail-grid a{color:var(--theme-primary);text-decoration:none}
+@media(max-width:1100px){.emp-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.emp-search{grid-column:1/-1}}
+@media(max-width:800px){.emp-table-wrap{overflow-x:auto}.emp-table{min-width:960px;table-layout:auto}}
+@media(max-width:640px){.emp-content{padding:14px}.emp-summary,.emp-filters,.emp-detail-grid{grid-template-columns:1fr}.emp-search{grid-column:auto}.emp-module .ui-pagehead{align-items:stretch;flex-direction:column}.emp-module .ui-pagehead-actions{margin-left:0}.emp-detail-grid>div,.emp-detail-grid>div:nth-child(odd){border-right:0;border-bottom:1px solid var(--theme-border)}.emp-detail-grid>div:last-child{border-bottom:0}}

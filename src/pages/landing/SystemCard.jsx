@@ -6,24 +6,31 @@
 
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import { isImplemented } from '../../core/moduleRegistry';
 
-export default function SystemCard({ entry }) {
+export default function SystemCard({ entry, index=0 }) {
   const Icon = entry.icon;
+  const live=isImplemented(entry.code);
   return (
-    <Link to={entry.routePath} className="sys-card" aria-label={`Open ${entry.name}`}>
+    <Link to={entry.routePath} className={`sys-card ${live?'is-live':'is-coming'}`} aria-label={`${live?'Open':'View'} ${entry.name}`} style={{'--card-index':index}}>
       <div className="sys-card-top">
         <span className="sys-card-icon" aria-hidden="true">
           <Icon size={20} />
         </span>
-        <span className="sys-card-code code">{entry.code.toUpperCase()}</span>
+        <span className="sys-card-meta"><span className="sys-card-state"><i/>{live?'Live':'Coming soon'}</span><span className="sys-card-code code">{entry.code.toUpperCase()}</span></span>
       </div>
 
       <h3 className="sys-card-name">{entry.name}</h3>
       <p className="sys-card-blurb">{entry.blurb}</p>
 
-      <span className="sys-card-enter">
-        Open <ArrowRight size={14} aria-hidden="true" />
-      </span>
+      <div className="sys-card-foot"><span className="sys-card-category">{entry.category}</span><span className="sys-card-enter" aria-hidden="true"><ArrowRight size={14}/></span></div>
+      <div className="sys-card-details">
+        <span className="sys-detail-label">Module overview</span>
+        <strong>{entry.name}</strong>
+        <p>{entry.blurb}</p>
+        <div><span>{entry.category}</span><b className={live?'live':'coming'}><i/>{live?'System live':'Coming soon'}</b></div>
+        <em>{live?'Open module':'View availability'} <ArrowRight size={14}/></em>
+      </div>
     </Link>
   );
 }

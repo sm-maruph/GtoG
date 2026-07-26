@@ -8,13 +8,17 @@ export default function ThemeToggle({ className = '' }) {
   return (
     <button
       type="button"
-      className={`theme-toggle ${className}`.trim()}
+      className={`theme-toggle ${isDark ? 'is-dark' : 'is-light'} ${className}`.trim()}
       onClick={toggleTheme}
       aria-label={`Switch to ${nextTheme} theme`}
       title={`Switch to ${nextTheme} theme`}
     >
-      {isDark ? <Sun size={16} /> : <Moon size={16} />}
-      <span>{isDark ? 'Light' : 'Dark'}</span>
+      <span className="theme-toggle-track" aria-hidden="true">
+        <Sun className="theme-toggle-sun" size={13}/>
+        <Moon className="theme-toggle-moon" size={13}/>
+        <i/>
+      </span>
+      <span className="theme-toggle-label">{isDark ? 'Light' : 'Dark'}</span>
     </button>
   );
 }

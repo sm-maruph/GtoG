@@ -10,6 +10,30 @@
  */
 
 import './ui.css';
+import { useEffect, useMemo, useState } from 'react';
+
+export function usePagination(rows, pageSize = 10) {
+  const [page, setPage] = useState(1);
+  const pageCount = Math.max(1, Math.ceil(rows.length / pageSize));
+  useEffect(() => { setPage(1); }, [rows, pageSize]);
+  useEffect(() => { if (page > pageCount) setPage(pageCount); }, [page, pageCount]);
+  const pagedRows = useMemo(() => rows.slice((page - 1) * pageSize, page * pageSize), [rows, page, pageSize]);
+  return { page, setPage, pageCount, pagedRows };
+}
+
+export function Pagination({ page, pageCount, total, pageSize = 10, onPageChange }) {
+  if (total <= pageSize) return null;
+  const first = (page - 1) * pageSize + 1;
+  const last = Math.min(page * pageSize, total);
+  return <nav className="ui-pagination" aria-label="Table pagination">
+    <span>Showing {first}–{last} of {total}</span>
+    <div>
+      <button type="button" disabled={page === 1} onClick={() => onPageChange(page - 1)}>Previous</button>
+      <strong>Page {page} of {pageCount}</strong>
+      <button type="button" disabled={page === pageCount} onClick={() => onPageChange(page + 1)}>Next</button>
+    </div>
+  </nav>;
+}
 
 /* ---- PageHeader: title + optional subtitle + right-aligned actions -------- */
 export function PageHeader({ title, subtitle, children }) {

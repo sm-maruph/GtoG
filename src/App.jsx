@@ -17,12 +17,14 @@ import ModuleGateway from './core/layout/ModuleGateway';
 import LandingPage from './pages/landing/LandingPage';
 import LoginPage from './pages/LoginPage';
 import { ThemeProvider } from './core/theme/ThemeContext';
+import TablePaginationManager from './core/ui/TablePaginationManager';
 import './styles/tokens.css';
 import './styles/theme-overrides.css';
 
 export default function App() {
   return (
     <ThemeProvider>
+      <TablePaginationManager />
       <BrowserRouter>
         <AuthProvider>
           <Routes>

@@ -14,6 +14,8 @@
   box-shadow: var(--shadow-lg);
   display: flex; flex-direction: column;
   max-height: calc(100vh - 2 * var(--sp-4));
+  min-width: 0;
+  overflow: hidden;
 }
 .ui-modal-sm { max-width: 420px; }
 .ui-modal-md { max-width: 560px; }
@@ -32,7 +34,7 @@
 }
 .ui-modal-close:hover { background: var(--ink-100); color: var(--ink-900); }
 
-.ui-modal-body { padding: var(--sp-4); overflow-y: auto; }
+.ui-modal-body { min-width: 0; padding: var(--sp-4); overflow-y: auto; }
 .ui-modal-foot {
   display: flex; justify-content: flex-end; gap: var(--sp-2);
   padding: var(--sp-3) var(--sp-4);

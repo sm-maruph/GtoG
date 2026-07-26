@@ -11,6 +11,8 @@ import * as client from '../api/client';
 import { recordAudit, setAuditActor } from '../audit/store';
 
 const AuthContext = createContext(null);
+const EMPLOYEE_DIRECTORY_MODULE = { moduleId: 6, code: 'emp', name: 'Employee Directory', icon: 'contact-round', routePath: '/employee-directory', sortOrder: 5 };
+const EXIMBILL_ROSTER_MODULE = { moduleId: 7, code: 'exb', name: 'IT EximBill Roster Duty', icon: 'calendar-clock', routePath: '/eximbill-roster', sortOrder: 7 };
 
 export function AuthProvider({ children }) {
   const [state, setState] = useState({
@@ -23,14 +25,23 @@ export function AuthProvider({ children }) {
   });
 
   const applyMe = useCallback((me) => {
+    const modules = [...(me.modules ?? [])];
+    if (!modules.some((module) => module.code === 'emp')) modules.push(EMPLOYEE_DIRECTORY_MODULE);
+    const isItUser = me.user?.dept?.code === 'IT' || /information technology/i.test(me.user?.dept?.name || '');
+    if (isItUser && !modules.some((module) => module.code === 'exb')) modules.push(EXIMBILL_ROSTER_MODULE);
+    const permissions = { ...(me.permissions ?? {}), 'emp.directory.view': { scopeType: 'GLOBAL', branchIds: [], deptIds: [] } };
+    if (isItUser) {
+      permissions['exb.roster.view'] ||= { scopeType: 'GLOBAL', branchIds: [], deptIds: [] };
+      permissions['exb.roster.complete'] ||= { scopeType: 'SELF', branchIds: [], deptIds: [] };
+    }
     setAuditActor(me.user);
     setState({
       status: 'authenticated',
       user: me.user,
       roles: me.roles ?? [],
       isSuperAdmin: me.isSuperAdmin ?? false,
-      modules: [...(me.modules ?? [])].sort((a, b) => a.sortOrder - b.sortOrder),
-      permissions: me.permissions ?? {},
+      modules: modules.sort((a, b) => a.sortOrder - b.sortOrder),
+      permissions,
     });
   }, []);
 

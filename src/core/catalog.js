@@ -1,10 +1,29 @@
 /** Central catalogue for every portal module. */
 import {
   Car, Boxes, Gauge, GraduationCap, Lightbulb, ClipboardList,
-  FileStack, ShieldCheck,
+  FileStack, ShieldCheck, ContactRound, CalendarClock,
+  Megaphone,
 } from 'lucide-react';
 
 export const MODULE_CATALOG = [
+  {
+    code: 'ann', name: 'Announcement Management',
+    blurb: 'Create, prioritize, schedule, and publish portal-wide operational announcements.',
+    category: 'Operations', icon: Megaphone, routePath: '/announcements', adminOnly: true,
+    welcome: 'Welcome to Announcement Management. Publish clear, prioritized portal notices for all users.',
+  },
+  {
+    code: 'emp', name: 'Employee Directory',
+    blurb: 'Find employee IDs, contact information, organisation placement, and reporting lines.',
+    category: 'People & Learning', icon: ContactRound, routePath: '/employee-directory',
+    welcome: 'Welcome to the Employee Directory. Search colleagues by name, ID, branch, department, designation, or contact details.',
+  },
+  {
+    code: 'exb', name: 'IT EximBill Roster Duty',
+    blurb: 'Plan daily EximBill processing duty, replacements, departures, and monthly reports.',
+    category: 'Operations', icon: CalendarClock, routePath: '/eximbill-roster',
+    welcome: 'Welcome to the IT EximBill Process Roster. Review daily assignments, complete duty, and track departure records.',
+  },
   {
     code: 'ins', name: 'Insurance Management Tracker',
     blurb: 'Manage borrower insurance policies, maturity risk, renewals, follow-ups, and exposure.',

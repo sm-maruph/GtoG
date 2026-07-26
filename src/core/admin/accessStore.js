@@ -3,6 +3,9 @@ import { recordAudit } from '../audit/store';
 const STORAGE_KEY = 'cbc.portal.access.v3';
 
 export const MODULE_DEFINITIONS = [
+  { moduleId: 8, code: 'ann', name: 'Announcement Management', icon: 'megaphone', routePath: '/announcements', sortOrder: 4 },
+  { moduleId: 6, code: 'emp', name: 'Employee Directory', icon: 'contact-round', routePath: '/employee-directory', sortOrder: 5 },
+  { moduleId: 7, code: 'exb', name: 'IT EximBill Roster Duty', icon: 'calendar-clock', routePath: '/eximbill-roster', sortOrder: 7 },
   { moduleId: 1, code: 'ins', name: 'Insurance Management Tracker', icon: 'clipboard-list', routePath: '/insurance', sortOrder: 10 },
   { moduleId: 2, code: 'vbs', name: 'Vehicle Booking System', icon: 'car', routePath: '/vehicle-booking', sortOrder: 20 },
   { moduleId: 3, code: 'inv', name: 'Stationery Inventory Management', icon: 'boxes', routePath: '/inventory', sortOrder: 30 },
@@ -12,6 +15,14 @@ export const MODULE_DEFINITIONS = [
 ];
 
 export const PERMISSION_DEFINITIONS = [
+  { module: 'ann', code: 'ann.announcement.view', label: 'View announcement management' },
+  { module: 'ann', code: 'ann.announcement.manage', label: 'IT: create, update, publish, and delete announcements' },
+  { module: 'emp', code: 'emp.directory.view', label: 'View employee directory' },
+  { module: 'emp', code: 'emp.employee.manage', label: 'HR: add, update, and delete employees' },
+  { module: 'exb', code: 'exb.roster.view', label: 'View EximBill duty roster' },
+  { module: 'exb', code: 'exb.roster.complete', label: 'Complete own EximBill duty and record departure' },
+  { module: 'exb', code: 'exb.roster.manage', label: 'Manage roster members, replacements, and departures' },
+  { module: 'exb', code: 'exb.report.view', label: 'View and export EximBill roster reports' },
   { module: 'ins', code: 'ins.policy.create', label: 'Create policies' },
   { module: 'ins', code: 'ins.policy.view', label: 'View policies' },
   { module: 'ins', code: 'ins.policy.edit', label: 'Edit policies' },
@@ -80,6 +91,29 @@ export const PERMISSION_DEFINITIONS = [
 
 const P = (code, scopeType = 'SELF') => ({ code, scopeType });
 
+const ROSTER_TEST_USERS = [
+  { username: 'maruph', displayName: 'S.M. Shahriar Rahman Maruph', email: 'maruph@combankbd.com', employeeId: 'BD6653' },
+  { username: 'raiyan.ahmed', displayName: 'Raiyan Ahmed', email: 'raiyan.ahmed@combankbd.com', employeeId: 'BD6654' },
+  { username: 'jahidul.balat', displayName: 'Jahidul Balat', email: 'jahidul.balat@combankbd.com', employeeId: '' },
+  { username: 'supriya.dasgupta', displayName: 'Supriya Das Gupta', email: 'supriya.dasgupta@combankbd.com', employeeId: '' },
+  { username: 'sifat.nur', displayName: 'Sifat Nur Billah', email: 'sifat.nur@combankbd.com', employeeId: 'BD0654' },
+  { username: 'al.noor', displayName: 'Shah Mohammad Al Noor', email: 'al.noor@combankbd.com', employeeId: 'BD6619' },
+  { username: 'abu.bakar', displayName: 'Abu Bakar Siddiq', email: 'abu.bakar@combankbd.com', employeeId: 'BD0608' },
+];
+
+function ensureRosterTestUsers(state) {
+  state.sequence ??= {};
+  state.sequence.user ??= Math.max(0, ...(state.users || []).map((user) => Number(user.userId) || 0)) + 1;
+  for (const profile of ROSTER_TEST_USERS) {
+    if (state.users.some((user) => user.username.toLowerCase() === profile.username)) continue;
+    state.users.push({
+      userId: state.sequence.user++, ...profile, password: 'demo', branchId: 1, deptId: 1,
+      status: 'ACTIVE', isSuperAdmin: false, roleIds: [1], groupIds: [], directPermissions: [],
+    });
+  }
+  return state;
+}
+
 function seedState() {
   const branches = [
     { branchId: 1, code: 'HQ', name: 'Head Office — Gulshan', type: 'HEAD_OFFICE', status: 'ACTIVE' },
@@ -135,6 +169,7 @@ function seedState() {
     { userId: 4, username: 'dept.user', password: 'demo', displayName: 'Farhana Islam', email: 'farhana.islam@combankbd.com', employeeId: 'BNGL0611', branchId: 1, deptId: 1, status: 'ACTIVE', isSuperAdmin: false, roleIds: [1], directPermissions: [] },
     { userId: 5, username: 'dept.head', password: 'demo', displayName: 'Kamrul Ahsan', email: 'kamrul.ahsan@combankbd.com', employeeId: 'BNGL0333', branchId: 1, deptId: 1, status: 'ACTIVE', isSuperAdmin: false, roleIds: [3], directPermissions: [] },
     { userId: 6, username: 'procurement.admin', password: 'demo', displayName: 'Tanzila Rahman', email: 'tanzila.rahman@combankbd.com', employeeId: 'BNGL0444', branchId: 1, deptId: 2, status: 'ACTIVE', isSuperAdmin: false, roleIds: [4], directPermissions: [] },
+    ...ROSTER_TEST_USERS.map((profile, index) => ({ userId: 7 + index, ...profile, password: 'demo', branchId: 1, deptId: 1, status: 'ACTIVE', isSuperAdmin: false, roleIds: [1], directPermissions: [], groupIds: [] })),
   ];
 
   const groups = [
@@ -142,7 +177,7 @@ function seedState() {
   ];
   users.forEach((user) => { user.groupIds = groups.filter((group) => group.userIds.includes(user.userId)).map((group) => group.groupId); });
 
-  return { branches, departments, roles, groups, users, sequence: { branch: 5, dept: 6, role: 6, group: 2, user: 7 } };
+  return { branches, departments, roles, groups, users, sequence: { branch: 5, dept: 6, role: 6, group: 2, user: 14 } };
 }
 
 function clone(value) { return JSON.parse(JSON.stringify(value)); }
@@ -160,6 +195,9 @@ function loadRaw() {
     state.sequence.group ??= Math.max(0, ...state.groups.map((group) => Number(group.groupId) || 0)) + 1;
     state.users = (state.users ?? []).map((user) => ({ ...user, roleIds: user.roleIds ?? [], groupIds: user.groupIds ?? [], directPermissions: user.directPermissions ?? [] }));
     state.groups = state.groups.map((group) => ({ ...group, roleIds: group.roleIds ?? [], permissions: group.permissions ?? [], userIds: group.userIds ?? [] }));
+    const userCount = state.users.length;
+    ensureRosterTestUsers(state);
+    if (state.users.length !== userCount) localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     return state;
   } catch {
     const seeded = seedState();
@@ -217,6 +255,11 @@ export function resolveManagedUser(username) {
   for (const permission of user.directPermissions ?? []) {
     if (permission.allowed === false) permissionMap.delete(permission.code);
     else permissionMap.set(permission.code, normalizePermission(permission, user));
+  }
+  permissionMap.set('emp.directory.view', { scopeType: 'GLOBAL', branchIds: [], deptIds: [] });
+  if (dept?.code === 'IT' || /information technology/i.test(dept?.name || '')) {
+    permissionMap.set('exb.roster.view', { scopeType: 'GLOBAL', branchIds: [], deptIds: [] });
+    permissionMap.set('exb.roster.complete', { scopeType: 'SELF', branchIds: [], deptIds: [] });
   }
   if (user.isSuperAdmin) {
     for (const def of PERMISSION_DEFINITIONS) permissionMap.set(def.code, { scopeType: 'GLOBAL', branchIds: [], deptIds: [] });

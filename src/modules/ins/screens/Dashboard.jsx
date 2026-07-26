@@ -18,8 +18,9 @@ export default function Dashboard() {
   const [following, setFollowing] = useState(null);
   const visible = useMemo(() => isAdmin && unitFilter !== 'ALL' ? state.policies.filter((p) => p.unitCode === unitFilter) : policies, [isAdmin, unitFilter, state.policies, policies]);
   const metrics = policyMetrics(visible);
-  const companies = companyRows(visible);
-  const risks = unitRows(visible);
+  const companies = companyRows(visible).sort((a,b)=>a.company.localeCompare(b.company));
+  const risks = unitRows(visible).sort((a,b)=>a.unitName.localeCompare(b.unitName));
+  const sortedUnits = [...units].sort((a,b)=>a.name.localeCompare(b.name));
 
   const openPolicies = (title, list, subtitle='') => setDialog({ title, policies:list, subtitle });
   const bandRows = (code) => visible.filter((p)=>maturityBand(p.maturityDate).code===code);
@@ -28,7 +29,7 @@ export default function Dashboard() {
 
   return <div>
     <PageHeader title="Insurance Dashboard" subtitle={`Real-time portfolio summary for ${isAdmin ? 'all accessible units' : unitName}.`}>
-      {isAdmin && <select className="ins-inline-select" value={unitFilter} onChange={(e)=>setUnitFilter(e.target.value)}><option value="ALL">All Units</option>{units.map((u)=><option key={u.code} value={u.code}>{u.name}</option>)}</select>}
+      {isAdmin && <select className="ins-inline-select" value={unitFilter} onChange={(e)=>setUnitFilter(e.target.value)} aria-label="Filter dashboard by unit"><option value="ALL">All Units</option>{sortedUnits.map((u)=><option key={u.code} value={u.code}>{u.name}</option>)}</select>}
     </PageHeader>
     <div className="ui-stat-grid ins-stat-grid-five">
       <StatTile label="Total policies" value={metrics.totalPolicies} icon={FileCheck2} onClick={()=>openPolicies('All policies',visible,'Complete policy portfolio in the selected scope.')} />

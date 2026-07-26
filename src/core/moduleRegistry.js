@@ -12,6 +12,9 @@
 import { lazy } from 'react';
 
 const MODULE_COMPONENTS = {
+  ann: lazy(() => import('../modules/ann/AnnModule.jsx')),
+  emp: lazy(() => import('../modules/emp/EmpModule.jsx')),
+  exb: lazy(() => import('../modules/exb/ExbModule.jsx')),
   vbs: lazy(() => import('../modules/vbs/VbsModule.jsx')),
   inv: lazy(() => import('../modules/inv/InvModule.jsx')),
   utl: lazy(() => import('../modules/utl/UtlModule.jsx')),

@@ -4,9 +4,9 @@
  * move directly to a system without returning to the card grid.
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ChevronDown, Grid3X3, LogOut, ShieldCheck } from 'lucide-react';
+import { ChevronDown, Clock3, Grid3X3, LogOut, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../core/auth/AuthContext';
 import { MODULE_CATALOG } from '../../core/catalog';
 import logo from '../../assets/cbc_logo.png';
@@ -15,8 +15,20 @@ import ThemeToggle from '../../core/theme/ThemeToggle';
 export default function PublicTopBar() {
   const { status, user, isSuperAdmin, logout } = useAuth();
   const [modulesOpen, setModulesOpen] = useState(false);
+  const [now, setNow] = useState(()=>new Date());
   const navigate = useNavigate();
-  const menuItems = MODULE_CATALOG.filter((entry) => !entry.adminOnly || (status === 'authenticated' && isSuperAdmin));
+  const menuItems = MODULE_CATALOG
+    .filter((entry) => !entry.adminOnly || (status === 'authenticated' && isSuperAdmin))
+    .sort((a,b)=>a.name.localeCompare(b.name));
+  const hour=now.getHours();
+  const greeting=hour<12?'Good morning':hour<17?'Good afternoon':hour<21?'Good evening':'Good night';
+  const time=now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true});
+  const date=now.toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
+
+  useEffect(()=>{
+    const timer=window.setInterval(()=>setNow(new Date()),1000);
+    return()=>window.clearInterval(timer);
+  },[]);
 
   async function handleLogout() {
     await logout();
@@ -34,6 +46,13 @@ export default function PublicTopBar() {
       </Link>
 
       <div className="lp-topbar-right">
+        <div className="lp-live-time" aria-label={`${greeting}. ${date}, ${time}`}>
+          <span className="lp-clock-icon" aria-hidden="true"><Clock3 size={15}/><i/></span>
+          <span className="lp-time-copy">
+            <span className="lp-greeting">{greeting}<i>!</i></span>
+            <span className="lp-date-time"><span>{date}</span><strong>{time}</strong></span>
+          </span>
+        </div>
         <ThemeToggle />
         <div className="lp-module-menu">
           <button type="button" className="lp-module-button" onClick={() => setModulesOpen((value) => !value)} aria-expanded={modulesOpen}>
