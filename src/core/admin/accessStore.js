@@ -73,6 +73,7 @@ export const PERMISSION_DEFINITIONS = [
   { module: 'adm', code: 'adm.directory.manage', label: 'Manage branches and departments' },
   { module: 'adm', code: 'adm.role.manage', label: 'Manage roles' },
   { module: 'adm', code: 'adm.user.manage', label: 'Manage portal users' },
+  { module: 'adm', code: 'adm.group.manage', label: 'Manage access groups' },
   { module: 'adm', code: 'adm.access.manage', label: 'Assign granular access' },
   { module: 'adm', code: 'adm.audit.view', label: 'View global audit log' },
 ];
@@ -136,7 +137,12 @@ function seedState() {
     { userId: 6, username: 'procurement.admin', password: 'demo', displayName: 'Tanzila Rahman', email: 'tanzila.rahman@combankbd.com', employeeId: 'BNGL0444', branchId: 1, deptId: 2, status: 'ACTIVE', isSuperAdmin: false, roleIds: [4], directPermissions: [] },
   ];
 
-  return { branches, departments, roles, users, sequence: { branch: 5, dept: 6, role: 6, user: 7 } };
+  const groups = [
+    { groupId: 1, code: 'PROCUREMENT_TEAM', name: 'Procurement Team', description: 'Shared procurement access group.', status: 'ACTIVE', roleIds: [4], permissions: [], userIds: [6] },
+  ];
+  users.forEach((user) => { user.groupIds = groups.filter((group) => group.userIds.includes(user.userId)).map((group) => group.groupId); });
+
+  return { branches, departments, roles, groups, users, sequence: { branch: 5, dept: 6, role: 6, group: 2, user: 7 } };
 }
 
 function clone(value) { return JSON.parse(JSON.stringify(value)); }
@@ -148,7 +154,13 @@ function loadRaw() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded));
       return seeded;
     }
-    return JSON.parse(raw);
+    const state = JSON.parse(raw);
+    state.groups ??= [];
+    state.sequence ??= {};
+    state.sequence.group ??= Math.max(0, ...state.groups.map((group) => Number(group.groupId) || 0)) + 1;
+    state.users = (state.users ?? []).map((user) => ({ ...user, roleIds: user.roleIds ?? [], groupIds: user.groupIds ?? [], directPermissions: user.directPermissions ?? [] }));
+    state.groups = state.groups.map((group) => ({ ...group, roleIds: group.roleIds ?? [], permissions: group.permissions ?? [], userIds: group.userIds ?? [] }));
+    return state;
   } catch {
     const seeded = seedState();
     localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded));
@@ -188,9 +200,19 @@ export function resolveManagedUser(username) {
   const branch = branchOf(state, user.branchId);
   const dept = deptOf(state, user.deptId);
   const assignedRoles = state.roles.filter((role) => user.roleIds.includes(role.roleId));
+  const assignedGroups = state.groups.filter((group) => group.status === 'ACTIVE' && (user.groupIds.includes(group.groupId) || group.userIds.includes(user.userId)));
+  const groupRoleIds = new Set(assignedGroups.flatMap((group) => group.roleIds));
+  const groupRoles = state.roles.filter((role) => groupRoleIds.has(role.roleId));
+  const effectiveRoles = [...new Map([...assignedRoles, ...groupRoles].map((role) => [role.roleId, role])).values()];
   const permissionMap = new Map();
-  for (const role of assignedRoles) {
+  for (const role of effectiveRoles) {
     for (const permission of role.permissions ?? []) permissionMap.set(permission.code, normalizePermission(permission, user));
+  }
+  for (const group of assignedGroups) {
+    for (const permission of group.permissions ?? []) {
+      if (permission.allowed === false) permissionMap.delete(permission.code);
+      else permissionMap.set(permission.code, normalizePermission(permission, user));
+    }
   }
   for (const permission of user.directPermissions ?? []) {
     if (permission.allowed === false) permissionMap.delete(permission.code);
@@ -214,7 +236,8 @@ export function resolveManagedUser(username) {
         branch: branch ? { branchId: branch.branchId, code: branch.code, name: branch.name } : null,
         dept: dept ? { deptId: dept.deptId, code: dept.code, name: dept.name } : null,
       },
-      roles: user.isSuperAdmin ? ['SUPER_ADMIN'] : assignedRoles.map((r) => r.code),
+      roles: user.isSuperAdmin ? ['SUPER_ADMIN'] : effectiveRoles.map((r) => r.code),
+      groups: assignedGroups.map((group) => ({ groupId: group.groupId, code: group.code, name: group.name })),
       isSuperAdmin: Boolean(user.isSuperAdmin),
       modules,
       permissions: Object.fromEntries(permissionMap.entries()),
@@ -261,21 +284,45 @@ export function updateRole(id, payload, actor) {
   const state = loadRaw(); const row = state.roles.find((x) => x.roleId === Number(id)); if (!row) throw new Error('Role not found.'); Object.assign(row, { name: payload.name.trim(), description: payload.description?.trim() || '', permissions: payload.permissions ?? [] }); saveRaw(state); recordAudit({ moduleCode: 'adm', action: 'ROLE_UPDATE', detail: `Updated role ${row.code} with ${row.permissions.length} permission(s).`, actor }); return clone(row);
 }
 export function deleteRole(id, actor) {
-  const state = loadRaw(); const row = state.roles.find((x) => x.roleId === Number(id)); if (!row) throw new Error('Role not found.'); if (row.isSystem) throw new Error('System roles cannot be deleted.'); if (state.users.some((x) => x.roleIds.includes(row.roleId))) throw new Error('Remove this role from users before deleting it.'); state.roles = state.roles.filter((x) => x.roleId !== row.roleId); saveRaw(state); recordAudit({ moduleCode: 'adm', action: 'ROLE_DELETE', detail: `Deleted role ${row.code}.`, actor }); return clone(row);
+  const state = loadRaw(); const row = state.roles.find((x) => x.roleId === Number(id)); if (!row) throw new Error('Role not found.'); if (row.isSystem) throw new Error('System roles cannot be deleted.'); if (state.users.some((x) => x.roleIds.includes(row.roleId)) || state.groups.some((x) => x.roleIds.includes(row.roleId))) throw new Error('Remove this role from users and groups before deleting it.'); state.roles = state.roles.filter((x) => x.roleId !== row.roleId); saveRaw(state); recordAudit({ moduleCode: 'adm', action: 'ROLE_DELETE', detail: `Deleted role ${row.code}.`, actor }); return clone(row);
+}
+
+export function addGroup(payload, actor) {
+  const state = loadRaw();
+  if (state.groups.some((group) => group.code.toLowerCase() === payload.code.trim().toLowerCase())) throw new Error('Group code already exists.');
+  const row = { groupId: state.sequence.group++, code: payload.code.trim().toUpperCase(), name: payload.name.trim(), description: payload.description?.trim() || '', status: payload.status || 'ACTIVE', roleIds: (payload.roleIds ?? []).map(Number), permissions: payload.permissions ?? [], userIds: (payload.userIds ?? []).map(Number) };
+  state.groups.push(row);
+  for (const user of state.users) user.groupIds = row.userIds.includes(user.userId) ? [...new Set([...(user.groupIds ?? []), row.groupId])] : (user.groupIds ?? []);
+  saveRaw(state); recordAudit({ moduleCode: 'adm', action: 'GROUP_ADD', detail: `Added access group ${row.code} with ${row.userIds.length} member(s).`, actor }); return clone(row);
+}
+export function updateGroup(id, payload, actor) {
+  const state = loadRaw(); const row = state.groups.find((group) => group.groupId === Number(id)); if (!row) throw new Error('Group not found.');
+  Object.assign(row, { name: payload.name.trim(), description: payload.description?.trim() || '', status: payload.status, roleIds: (payload.roleIds ?? []).map(Number), permissions: payload.permissions ?? [], userIds: (payload.userIds ?? []).map(Number) });
+  for (const user of state.users) user.groupIds = row.userIds.includes(user.userId) ? [...new Set([...(user.groupIds ?? []), row.groupId])] : (user.groupIds ?? []).filter((groupId) => groupId !== row.groupId);
+  saveRaw(state); recordAudit({ moduleCode: 'adm', action: 'GROUP_UPDATE', detail: `Updated access group ${row.code}: ${row.userIds.length} member(s), ${row.permissions.length} override(s).`, actor }); return clone(row);
+}
+export function deleteGroup(id, actor) {
+  const state = loadRaw(); const index = state.groups.findIndex((group) => group.groupId === Number(id)); if (index < 0) throw new Error('Group not found.');
+  const [row] = state.groups.splice(index, 1);
+  for (const user of state.users) user.groupIds = (user.groupIds ?? []).filter((groupId) => groupId !== row.groupId);
+  saveRaw(state); recordAudit({ moduleCode: 'adm', action: 'GROUP_DELETE', detail: `Deleted access group ${row.code}.`, actor }); return clone(row);
 }
 
 export function addUser(payload, actor) {
   const state = loadRaw(); if (state.users.some((x) => x.username.toLowerCase() === payload.username.trim().toLowerCase())) throw new Error('Username already exists.');
-  const row = { userId: state.sequence.user++, username: payload.username.trim().toLowerCase(), password: payload.password || 'demo', displayName: payload.displayName.trim(), email: payload.email.trim().toLowerCase(), employeeId: payload.employeeId.trim().toUpperCase(), branchId: payload.branchId ? Number(payload.branchId) : null, deptId: payload.deptId ? Number(payload.deptId) : null, status: payload.status || 'ACTIVE', isSuperAdmin: Boolean(payload.isSuperAdmin), roleIds: (payload.roleIds ?? []).map(Number), directPermissions: payload.directPermissions ?? [] };
+  const row = { userId: state.sequence.user++, username: payload.username.trim().toLowerCase(), password: payload.password || 'demo', displayName: payload.displayName.trim(), email: payload.email.trim().toLowerCase(), employeeId: payload.employeeId.trim().toUpperCase(), branchId: payload.branchId ? Number(payload.branchId) : null, deptId: payload.deptId ? Number(payload.deptId) : null, status: payload.status || 'ACTIVE', isSuperAdmin: Boolean(payload.isSuperAdmin), roleIds: (payload.roleIds ?? []).map(Number), groupIds: (payload.groupIds ?? []).map(Number), directPermissions: payload.directPermissions ?? [] };
+  for (const group of state.groups) group.userIds = row.groupIds.includes(group.groupId) ? [...new Set([...group.userIds, row.userId])] : group.userIds;
   state.users.push(row); saveRaw(state); recordAudit({ moduleCode: 'adm', action: 'PORTAL_USER_ADD', detail: `Added portal user ${row.username}.`, actor }); return clone(row);
 }
 export function updateUser(id, payload, actor) {
   const state = loadRaw(); const row = state.users.find((x) => x.userId === Number(id)); if (!row) throw new Error('User not found.');
-  Object.assign(row, { displayName: payload.displayName.trim(), email: payload.email.trim().toLowerCase(), employeeId: payload.employeeId.trim().toUpperCase(), branchId: payload.branchId ? Number(payload.branchId) : null, deptId: payload.deptId ? Number(payload.deptId) : null, status: payload.status, isSuperAdmin: Boolean(payload.isSuperAdmin), roleIds: (payload.roleIds ?? []).map(Number) }); if (payload.password) row.password = payload.password; saveRaw(state); recordAudit({ moduleCode: 'adm', action: 'PORTAL_USER_UPDATE', detail: `Updated portal user ${row.username}.`, actor }); return clone(row);
+  Object.assign(row, { displayName: payload.displayName.trim(), email: payload.email.trim().toLowerCase(), employeeId: payload.employeeId.trim().toUpperCase(), branchId: payload.branchId ? Number(payload.branchId) : null, deptId: payload.deptId ? Number(payload.deptId) : null, status: payload.status, isSuperAdmin: Boolean(payload.isSuperAdmin), roleIds: (payload.roleIds ?? []).map(Number), groupIds: (payload.groupIds ?? []).map(Number) }); if (payload.password) row.password = payload.password;
+  for (const group of state.groups) group.userIds = row.groupIds.includes(group.groupId) ? [...new Set([...group.userIds, row.userId])] : group.userIds.filter((userId) => userId !== row.userId);
+  saveRaw(state); recordAudit({ moduleCode: 'adm', action: 'PORTAL_USER_UPDATE', detail: `Updated portal user ${row.username}.`, actor }); return clone(row);
 }
 export function updateUserPermissions(id, directPermissions, actor) {
   const state = loadRaw(); const row = state.users.find((x) => x.userId === Number(id)); if (!row) throw new Error('User not found.'); row.directPermissions = directPermissions; saveRaw(state); recordAudit({ moduleCode: 'adm', action: 'ACCESS_ASSIGN', detail: `Updated granular access for ${row.username}: ${directPermissions.filter((x) => x.allowed !== false).length} direct permission(s).`, actor }); return clone(row);
 }
 export function deleteUser(id, actor) {
-  const state = loadRaw(); const index = state.users.findIndex((x) => x.userId === Number(id)); if (index < 0) throw new Error('User not found.'); const row = state.users[index]; if (row.isSuperAdmin && state.users.filter((x) => x.isSuperAdmin && x.status === 'ACTIVE').length <= 1) throw new Error('At least one active Super Admin must remain.'); state.users.splice(index, 1); saveRaw(state); recordAudit({ moduleCode: 'adm', action: 'PORTAL_USER_DELETE', detail: `Deleted portal user ${row.username}.`, actor }); return clone(row);
+  const state = loadRaw(); const index = state.users.findIndex((x) => x.userId === Number(id)); if (index < 0) throw new Error('User not found.'); const row = state.users[index]; if (row.isSuperAdmin && state.users.filter((x) => x.isSuperAdmin && x.status === 'ACTIVE').length <= 1) throw new Error('At least one active Super Admin must remain.'); state.users.splice(index, 1); for (const group of state.groups) group.userIds = group.userIds.filter((userId) => userId !== row.userId); saveRaw(state); recordAudit({ moduleCode: 'adm', action: 'PORTAL_USER_DELETE', detail: `Deleted portal user ${row.username}.`, actor }); return clone(row);
 }

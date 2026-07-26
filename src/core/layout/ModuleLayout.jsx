@@ -5,6 +5,7 @@ import { useAuth } from '../auth/AuthContext';
 import { ScopeChip } from '../ui';
 import { getCatalogEntry } from '../catalog';
 import ModuleWelcome from './ModuleWelcome';
+import ThemeToggle from '../theme/ThemeToggle';
 import './ModuleLayout.css';
 
 export default function ModuleLayout({ entry, children }) {
@@ -33,7 +34,7 @@ export default function ModuleLayout({ entry, children }) {
 
         <div className="ml-module-menu">
           <button className="ml-module-btn" onClick={() => setModulesOpen((v) => !v)} aria-expanded={modulesOpen}>
-            <Grid3X3 size={15} /><span>Modules</span><ChevronDown size={13} />
+            <Grid3X3 size={15} /><span>View Modules</span><ChevronDown size={13} />
           </button>
           {modulesOpen && <div className="ml-modules-popover">
             <div className="ml-popover-title">Your module access</div>
@@ -46,6 +47,7 @@ export default function ModuleLayout({ entry, children }) {
           </div>}
         </div>
 
+        <ThemeToggle />
         <ScopeChip label={scopeLabel} />
         <div className="ml-user">
           <button className="ml-user-btn" onClick={() => setUserOpen((v) => !v)} aria-expanded={userOpen} aria-haspopup="menu"><span className="ml-avatar">{initials(user?.displayName)}</span><ChevronDown size={14} /></button>

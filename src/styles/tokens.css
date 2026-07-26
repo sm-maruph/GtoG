@@ -12,30 +12,52 @@
 @import '@fontsource/jetbrains-mono/500.css';
 
 :root {
-  /* --- Brand: taken from the CBC mark ------------------------------------ */
-  --cbc-blue-900: #071426;
-  --cbc-blue-800: #0c3158;
-  --cbc-blue-700: #3b94ea;
-  --cbc-blue-600: #247fd8;   /* primary action */
-  --cbc-blue-500: #52a4f4;
-  --cbc-blue-100: #274767;
-  --cbc-blue-50:  #162d45;
+  /* -----------------------------------------------------------------------
+     EDIT THE TWO PALETTES BELOW TO REBRAND THE ENTIRE PORTAL.
+     Components and modules consume these semantic variables, not raw colors.
+     ----------------------------------------------------------------------- */
+  --theme-primary: #2196F3;
+  --theme-primary-hover: #42A5F5;
+  --theme-primary-light: #163E5C;
+  --theme-secondary: #74C94C;
+  --theme-secondary-hover: #86D563;
+  --theme-background: #081B2B;
+  --theme-surface: #10273B;
+  --theme-card: #163247;
+  --theme-border: #284A63;
+  --theme-heading: #FFFFFF;
+  --theme-text: #D7E4EF;
+  --theme-muted: #9FB4C6;
+  --theme-success: #4ADE80;
+  --theme-warning: #FBBF24;
+  --theme-error: #F87171;
+  --theme-info: #38BDF8;
+  --theme-on-primary: #FFFFFF;
 
-  --cbc-green-700: #83d360;
-  --cbc-green-600: #67bd44;
-  --cbc-green-500: #73c94f;  /* the logo underline */
-  --cbc-green-50:  #183422;
+  /* --- Brand: taken from the CBC mark ------------------------------------ */
+  --cbc-blue-900: var(--theme-background);
+  --cbc-blue-800: var(--theme-surface);
+  --cbc-blue-700: var(--theme-primary-hover);
+  --cbc-blue-600: var(--theme-primary);
+  --cbc-blue-500: var(--theme-info);
+  --cbc-blue-100: var(--theme-primary-light);
+  --cbc-blue-50:  var(--theme-card);
+
+  --cbc-green-700: var(--theme-secondary-hover);
+  --cbc-green-600: var(--theme-secondary);
+  --cbc-green-500: var(--theme-secondary);
+  --cbc-green-50: color-mix(in srgb, var(--theme-secondary) 16%, transparent);
 
   /* --- Neutrals ---------------------------------------------------------- */
-  --ink-900: #eef4fb;
-  --ink-700: #c7d4e4;
-  --ink-500: #93a6bd;
-  --ink-400: #72859c;
-  --ink-300: #40526a;
-  --ink-200: #293a50;
-  --ink-100: #1d2b3d;
-  --ink-50:  #09111e;
-  --white:   #111c2c;
+  --ink-900: var(--theme-heading);
+  --ink-700: var(--theme-text);
+  --ink-500: var(--theme-muted);
+  --ink-400: var(--theme-muted);
+  --ink-300: var(--theme-border);
+  --ink-200: var(--theme-border);
+  --ink-100: var(--theme-surface);
+  --ink-50:  var(--theme-background);
+  --white:   var(--theme-card);
 
   /* --- Status: workflow states need to be readable at a glance ----------- */
   --status-draft:    #64748b;
@@ -45,10 +67,10 @@
   --status-active:   #0057a8;
   --status-done:     #475569;
 
-  --danger-600:  #b91c1c;
-  --danger-50:   #3a1d25;
-  --warn-600:    #b45309;
-  --warn-50:     #3b2b14;
+  --danger-600:  var(--theme-error);
+  --danger-50:   color-mix(in srgb, var(--theme-error) 14%, var(--theme-card));
+  --warn-600:    var(--theme-warning);
+  --warn-50:     color-mix(in srgb, var(--theme-warning) 14%, var(--theme-card));
 
   /* --- Type -------------------------------------------------------------- */
   --font-ui:   'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -80,6 +102,29 @@
   --header-h:  56px;
 
   --focus-ring: 0 0 0 3px var(--cbc-blue-100);
+}
+
+:root[data-theme='light'] {
+  --theme-primary: #006FBE;
+  --theme-primary-hover: #005AA3;
+  --theme-primary-light: #EAF5FD;
+  --theme-secondary: #5CB040;
+  --theme-secondary-hover: #4A9A32;
+  --theme-background: #F7FAFC;
+  --theme-surface: #F1F5F9;
+  --theme-card: #FFFFFF;
+  --theme-border: #D8E2EB;
+  --theme-heading: #12324A;
+  --theme-text: #445566;
+  --theme-muted: #7A8896;
+  --theme-success: #22C55E;
+  --theme-warning: #F59E0B;
+  --theme-error: #DC2626;
+  --theme-info: #0EA5E9;
+  --theme-on-primary: #FFFFFF;
+  --shadow-sm: 0 1px 3px rgba(18, 50, 74, 0.08);
+  --shadow: 0 8px 22px rgba(18, 50, 74, 0.10);
+  --shadow-lg: 0 18px 48px rgba(18, 50, 74, 0.16);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -129,7 +174,7 @@ body {
   transition: background 0.12s ease, border-color 0.12s ease;
 }
 .btn:disabled { opacity: 0.55; cursor: not-allowed; }
-.btn-primary { background: var(--cbc-blue-600); color: var(--white); }
+.btn-primary { background: var(--cbc-blue-600); color: var(--theme-on-primary); }
 .btn-primary:hover:not(:disabled) { background: var(--cbc-blue-700); }
 .btn-ghost { background: transparent; color: var(--ink-700); border-color: var(--ink-200); }
 .btn-ghost:hover:not(:disabled) { background: var(--ink-100); }

@@ -1,0 +1,387 @@
+/*
+ * GLOBAL THEME ADAPTER
+ * Keep all palette values in tokens.css. This file only maps existing module
+ * components to the semantic --theme-* variables.
+ */
+
+html { background: var(--theme-background); }
+body { color: var(--theme-text); background: var(--theme-background); }
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 6px 10px;
+  border: 1px solid var(--theme-border);
+  border-radius: 8px;
+  background: var(--theme-card);
+  color: var(--theme-text);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+.theme-toggle:hover {
+  border-color: var(--theme-primary);
+  background: var(--theme-primary-light);
+  color: var(--theme-primary);
+}
+
+.ui-scope {
+  background: var(--theme-card) !important;
+  border-color: var(--theme-border) !important;
+}
+.ui-scope-label { color: var(--theme-muted) !important; }
+.ui-scope-value {
+  color: var(--theme-heading) !important;
+  font-weight: 700;
+}
+
+/* Portal and shared module header */
+.ml, .lp { background: var(--theme-background) !important; color: var(--theme-text) !important; }
+.ml-header, .lp-topbar {
+  background: color-mix(in srgb, var(--theme-surface) 94%, transparent) !important;
+  border-color: var(--theme-border) !important;
+}
+.ml-title-name, .ml-menu-head strong, .lp-user-name { color: var(--theme-heading) !important; }
+.ml-back, .ml-module-btn, .ml-menu-item, .lp-module-button { color: var(--theme-text) !important; }
+.ml-back:hover, .ml-module-btn:hover, .ml-user-btn:hover, .ml-menu-item:hover,
+.lp-module-button:hover { background: var(--theme-primary-light) !important; color: var(--theme-primary) !important; }
+.ml-title-icon, .ml-modules-popover a > span, .lp-module-popover-icon {
+  background: var(--theme-primary-light) !important;
+  color: var(--theme-primary) !important;
+  border-color: color-mix(in srgb, var(--theme-primary) 25%, var(--theme-border)) !important;
+}
+.ml-modules-popover, .ml-menu, .lp-module-popover {
+  background: var(--theme-card) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text) !important;
+}
+.ml-modules-popover a, .lp-module-popover a { color: var(--theme-text) !important; }
+.ml-modules-popover a:hover, .ml-modules-popover a.current, .lp-module-popover a:hover {
+  background: var(--theme-primary-light) !important;
+  border-color: color-mix(in srgb, var(--theme-primary) 25%, var(--theme-border)) !important;
+  color: var(--theme-heading) !important;
+}
+
+/* Landing page */
+.lp-hero {
+  background:
+    radial-gradient(900px 520px at 82% 0%, color-mix(in srgb, var(--theme-primary) 20%, transparent), transparent 62%),
+    radial-gradient(650px 430px at 5% 110%, color-mix(in srgb, var(--theme-secondary) 14%, transparent), transparent 60%),
+    var(--theme-background) !important;
+  border-color: var(--theme-border) !important;
+}
+.lp-hero-title {
+  background: linear-gradient(90deg, var(--theme-heading), var(--theme-primary));
+  -webkit-background-clip: text;
+  color: transparent;
+}
+.lp-hero-sub, .sys-card-blurb, .lp-footer-addr { color: var(--theme-muted) !important; }
+.lp-eyebrow {
+  background: color-mix(in srgb, var(--theme-secondary) 12%, transparent) !important;
+  border-color: color-mix(in srgb, var(--theme-secondary) 35%, var(--theme-border)) !important;
+  color: var(--theme-secondary) !important;
+}
+.lp-hero-badges span, .sys-card, .lp-footer {
+  background: var(--theme-card) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text) !important;
+}
+.sys-section-head, .lp-footer { border-color: var(--theme-border) !important; }
+.sys-card-icon { background: var(--theme-primary-light) !important; color: var(--theme-primary) !important; border-color: var(--theme-border) !important; }
+.sys-card:hover { border-color: var(--theme-primary) !important; }
+.sys-card-name, .lp-footer-org { color: var(--theme-heading) !important; }
+.sys-card-enter { color: var(--theme-primary) !important; }
+
+/* Shared controls */
+input, select, textarea {
+  color: var(--theme-text);
+  background-color: var(--theme-card);
+  border-color: var(--theme-border);
+}
+.card, .ui-panel, .ui-stat, .ui-modal {
+  background: var(--theme-card);
+  border-color: var(--theme-border);
+  color: var(--theme-text);
+}
+.btn-primary { background: var(--theme-primary) !important; border-color: var(--theme-primary) !important; color: var(--theme-on-primary) !important; }
+.btn-primary:hover:not(:disabled) { background: var(--theme-primary-hover) !important; border-color: var(--theme-primary-hover) !important; }
+.btn-secondary, .btn-ghost { background: var(--theme-surface); border-color: var(--theme-border); color: var(--theme-text); }
+
+/* Login */
+.login { background:
+  radial-gradient(900px 500px at 88% 8%, color-mix(in srgb, var(--theme-secondary) 16%, transparent), transparent 62%),
+  radial-gradient(700px 500px at 8% 92%, color-mix(in srgb, var(--theme-primary) 20%, transparent), transparent 60%),
+  var(--theme-background) !important;
+}
+.login-panel { background: var(--theme-card) !important; color: var(--theme-text) !important; }
+.login-title, .login-brand strong, .login-context-name { color: var(--theme-heading) !important; }
+.login-context { background: var(--theme-primary-light) !important; border-color: var(--theme-border) !important; }
+.login-context-icon { background: var(--theme-primary) !important; color: var(--theme-on-primary) !important; }
+.login-foot { color: var(--theme-muted) !important; }
+
+/* Insurance */
+.ins-module {
+  --ins-bg: var(--theme-background);
+  --ins-bg2: var(--theme-card);
+  --ins-bg3: var(--theme-surface);
+  --ins-border: var(--theme-border);
+  --ins-accent: var(--theme-primary);
+  --ins-accent2: var(--theme-info);
+  --ins-danger: var(--theme-error);
+  --ins-warn: var(--theme-warning);
+  --ins-ok: var(--theme-success);
+  --ins-text: var(--theme-text);
+  --ins-muted: var(--theme-muted);
+}
+.ins-module .ui-pagehead-title, .ins-brand strong, .ins-topbar strong { color: var(--theme-heading) !important; }
+.ins-nav-link.active { background: var(--theme-primary-light) !important; color: var(--theme-primary) !important; border-color: var(--theme-border) !important; }
+
+/* Utility */
+.utl-module {
+  --utl-blue: var(--theme-primary);
+  --utl-blue-d: var(--theme-primary-hover);
+  --utl-green: var(--theme-secondary);
+  --utl-red: var(--theme-error);
+  --utl-orange: var(--theme-warning);
+  --utl-teal: var(--theme-info);
+  --utl-bg: var(--theme-background);
+  --utl-side: var(--theme-surface);
+  --utl-side2: var(--theme-surface);
+  --utl-border: var(--theme-border);
+  --utl-text: var(--theme-text);
+  background: var(--theme-background) !important;
+  color: var(--theme-text) !important;
+}
+.utl-sidebar { background: var(--theme-surface) !important; color: var(--theme-text) !important; }
+.utl-bank-header, .utl-card, .utl-stat { background: var(--theme-card) !important; border-color: var(--theme-border) !important; }
+.utl-card > header, .utl-table th { background: var(--theme-surface) !important; border-color: var(--theme-border) !important; }
+.utl-page-head h1, .utl-card > header h2, .utl-stat strong, .utl-def dd, .utl-bank-header strong { color: var(--theme-heading) !important; }
+.utl-page-head p, .utl-section-label, .utl-stat span:not(.utl-stat-icon), .utl-stat small, .utl-def dt { color: var(--theme-muted) !important; }
+.utl-table td { color: var(--theme-text) !important; border-color: var(--theme-border) !important; }
+.utl-table tbody tr:hover td { background: var(--theme-primary-light) !important; }
+.utl-field input, .utl-field select { background: var(--theme-card) !important; border-color: var(--theme-border) !important; color: var(--theme-text) !important; }
+.utl-nav-link.active { background: var(--theme-primary-light) !important; color: var(--theme-primary) !important; border-color: var(--theme-border) !important; }
+
+/* Stationery inventory */
+.inv-module { background: var(--theme-background) !important; color: var(--theme-text) !important; }
+.inv-sidebar { background: var(--theme-surface) !important; color: var(--theme-text) !important; }
+.inv-topbar, .inv-card, .inv-stat { background: var(--theme-card) !important; border-color: var(--theme-border) !important; }
+.inv-card > header, .inv-table th, .inv-filter { background: var(--theme-surface) !important; border-color: var(--theme-border) !important; }
+.inv-page-head h1, .inv-card h2, .inv-stat strong, .inv-topbar strong { color: var(--theme-heading) !important; }
+.inv-page-head p, .inv-stat small, .inv-card small { color: var(--theme-muted) !important; }
+.inv-table td { color: var(--theme-text) !important; border-color: var(--theme-border) !important; }
+.inv-table tbody tr:hover td { background: var(--theme-primary-light) !important; }
+.inv-field input, .inv-field select, .inv-field textarea, .inv-search {
+  background: var(--theme-card) !important; border-color: var(--theme-border) !important; color: var(--theme-text) !important;
+}
+.inv-primary { background: var(--theme-primary) !important; color: var(--theme-on-primary) !important; }
+.inv-secondary { background: var(--theme-surface) !important; border-color: var(--theme-border) !important; color: var(--theme-text) !important; }
+.inv-nav-link.active { background: var(--theme-primary-light) !important; color: var(--theme-primary) !important; border-color: var(--theme-border) !important; }
+
+/* Paper usage */
+.ppr-module { background: var(--theme-background) !important; color: var(--theme-text) !important; }
+.ppr-sidebar { background: var(--theme-surface) !important; border-color: var(--theme-border) !important; }
+.ppr-topbar, .ppr-module .ui-panel, .ppr-module .ui-stat { background: var(--theme-card) !important; border-color: var(--theme-border) !important; }
+.ppr-module .ui-panel-head, .ppr-module .ui-table th { background: var(--theme-surface) !important; border-color: var(--theme-border) !important; }
+.ppr-module .ui-pagehead-title, .ppr-module .ui-panel-title, .ppr-topbar strong { color: var(--theme-heading) !important; }
+.ppr-module .ui-pagehead-sub, .ppr-topbar span, .ppr-module small { color: var(--theme-muted) !important; }
+.ppr-module .ui-table td { color: var(--theme-text) !important; border-color: var(--theme-border) !important; }
+.ppr-module .ui-table tbody tr:hover { background: var(--theme-primary-light) !important; }
+.ppr-module input, .ppr-module select, .ppr-module textarea {
+  background: var(--theme-card) !important; border-color: var(--theme-border) !important; color: var(--theme-text) !important;
+}
+.ppr-nav-link.active { background: var(--theme-primary-light) !important; color: var(--theme-primary) !important; box-shadow: inset 3px 0 var(--theme-primary) !important; }
+
+/* Super admin */
+.adm-module { background: var(--theme-background) !important; color: var(--theme-text) !important; }
+.adm-side, .adm-top { background: var(--theme-surface) !important; border-color: var(--theme-border) !important; }
+.adm-user, .adm-module .ui-panel, .adm-filter, .adm-permission-groups section, .adm-role-picker label, .adm-module-list > div {
+  background: var(--theme-card) !important; border-color: var(--theme-border) !important;
+}
+.adm-module .ui-panel-title, .adm-top strong { color: var(--theme-heading) !important; }
+.adm-table-wrap .ui-table th { background: var(--theme-surface) !important; color: var(--theme-muted) !important; border-color: var(--theme-border) !important; }
+.adm-table-wrap .ui-table td { color: var(--theme-text) !important; border-color: var(--theme-border) !important; }
+.adm-filter input, .adm-filter select, .adm-permission-row select, .adm-access-row select, .adm-access-head select {
+  background: var(--theme-card) !important; border-color: var(--theme-border) !important; color: var(--theme-text) !important;
+}
+.adm-side nav a.active { background: var(--theme-primary-light) !important; color: var(--theme-primary) !important; box-shadow: inset 3px 0 var(--theme-primary) !important; }
+.adm-brand, .adm-side-note, .adm-top, .adm-table-wrap .ui-table th,
+.adm-table-wrap .ui-table td, .adm-filter, .adm-permission-row,
+.adm-access-row {
+  border-color: var(--theme-border) !important;
+}
+.adm-brand strong, .adm-user strong, .adm-module strong,
+.adm-module .ui-pagehead-title, .adm-permission-row strong,
+.adm-access-row strong, .adm-check-list b {
+  color: var(--theme-heading) !important;
+}
+.adm-brand small, .adm-user small, .adm-side-note, .adm-top div span,
+.adm-module .ui-pagehead-sub, .adm-table-wrap .ui-table small,
+.adm-module-list small, .adm-role-picker small, .adm-check-list small,
+.adm-note, .adm-access-head > div span, .adm-access-row small {
+  color: var(--theme-muted) !important;
+}
+.adm-table-wrap .ui-table tbody tr {
+  background: var(--theme-card) !important;
+}
+.adm-table-wrap .ui-table tbody tr:hover {
+  background: var(--theme-primary-light) !important;
+}
+.adm-filter label, .adm-check, .adm-group-columns > section,
+.adm-check-list label, .adm-access-model > div {
+  background: var(--theme-card) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text) !important;
+}
+.adm-filter label input {
+  background: transparent !important;
+}
+.adm-module input, .adm-module select, .adm-module textarea,
+.adm-target-select, .adm-group-permission-title select {
+  background: var(--theme-card) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text) !important;
+}
+.adm-module input::placeholder, .adm-module textarea::placeholder {
+  color: var(--theme-muted) !important;
+}
+.adm-permission-groups h3, .adm-group-columns h3,
+.adm-access-row em, .adm-top > span {
+  color: var(--theme-primary) !important;
+}
+.adm-module-list > div > span, .adm-super {
+  background: var(--theme-primary-light) !important;
+  color: var(--theme-primary) !important;
+}
+.adm-actions button {
+  background: var(--theme-primary-light) !important;
+  border-color: color-mix(in srgb, var(--theme-primary) 45%, var(--theme-border)) !important;
+  color: var(--theme-primary) !important;
+}
+.adm-actions button:hover {
+  background: var(--theme-primary) !important;
+  border-color: var(--theme-primary) !important;
+  color: var(--theme-on-primary) !important;
+}
+.adm-actions button.danger {
+  background: color-mix(in srgb, var(--theme-error) 12%, var(--theme-card)) !important;
+  border-color: color-mix(in srgb, var(--theme-error) 40%, var(--theme-border)) !important;
+  color: var(--theme-error) !important;
+}
+.adm-actions button.danger:hover {
+  background: var(--theme-error) !important;
+  border-color: var(--theme-error) !important;
+  color: #fff !important;
+}
+.adm-status.active, .adm-audit-success {
+  background: color-mix(in srgb, var(--theme-success) 18%, var(--theme-card)) !important;
+  color: color-mix(in srgb, var(--theme-success) 72%, var(--theme-heading)) !important;
+}
+.adm-status.inactive, .adm-audit-failed {
+  background: color-mix(in srgb, var(--theme-error) 15%, var(--theme-card)) !important;
+  color: var(--theme-error) !important;
+}
+
+/* Light mode needs dark text on pale navigation surfaces. */
+:root[data-theme='light'] .ins-sidebar,
+:root[data-theme='light'] .utl-sidebar,
+:root[data-theme='light'] .inv-sidebar,
+:root[data-theme='light'] .ppr-sidebar,
+:root[data-theme='light'] .adm-side { color: var(--theme-text) !important; }
+
+@media (max-width: 760px) {
+  .theme-toggle span { display: none; }
+  .theme-toggle { width: 34px; padding: 6px; }
+}
+
+/* Late-loaded interaction fixes: never use white hover text on light sidebars. */
+.ins-nav-link:hover,
+.utl-nav-link:hover,
+.inv-nav-link:hover,
+.ppr-nav-link:hover,
+.adm-side nav a:hover {
+  background: var(--theme-primary-light) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-primary) !important;
+}
+
+/* Utility branch picker and its native option popup. */
+.utl-branch-select { color: var(--theme-muted) !important; }
+.utl-branch-select select,
+.utl-branch-select select option {
+  background: var(--theme-card) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text) !important;
+}
+.utl-branch-select select:focus {
+  border-color: var(--theme-primary) !important;
+  outline: 2px solid color-mix(in srgb, var(--theme-primary) 25%, transparent);
+}
+
+/* Insurance chart hover card. */
+.ins-chart-tooltip {
+  background: var(--theme-card) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-heading) !important;
+  box-shadow: var(--shadow) !important;
+}
+.ins-chart-tooltip span { color: var(--theme-muted) !important; }
+.ins-legend button:hover { color: var(--theme-primary) !important; }
+.ins-module .icon-btn:hover {
+  background: var(--theme-primary-light) !important;
+  border-color: var(--theme-primary) !important;
+  color: var(--theme-primary) !important;
+}
+.ins-module .icon-btn.danger:hover {
+  background: color-mix(in srgb, var(--theme-error) 14%, var(--theme-card)) !important;
+  border-color: var(--theme-error) !important;
+  color: var(--theme-error) !important;
+}
+
+/* Strong light-mode contrast in the global navigation. */
+:root[data-theme='light'] .ui-scope {
+  background: var(--theme-card) !important;
+  border-color: var(--theme-border) !important;
+}
+:root[data-theme='light'] .ui-scope-label {
+  color: var(--theme-text) !important;
+}
+:root[data-theme='light'] .ui-scope-value {
+  color: var(--theme-heading) !important;
+  font-weight: 700;
+}
+:root[data-theme='light'] .ml-modules-popover a,
+:root[data-theme='light'] .lp-module-popover a {
+  color: var(--theme-text) !important;
+}
+:root[data-theme='light'] .ml-modules-popover strong,
+:root[data-theme='light'] .lp-module-popover strong {
+  color: var(--theme-heading) !important;
+  font-weight: 700;
+}
+:root[data-theme='light'] .ml-modules-popover small,
+:root[data-theme='light'] .lp-module-popover small,
+:root[data-theme='light'] .ml-popover-title,
+:root[data-theme='light'] .lp-module-popover-title {
+  color: var(--theme-text) !important;
+}
+:root[data-theme='light'] .lp-module-button,
+:root[data-theme='light'] .ml-module-btn {
+  background: var(--theme-card) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-heading) !important;
+}
+:root[data-theme='light'] .lp-module-button:hover,
+:root[data-theme='light'] .ml-module-btn:hover,
+:root[data-theme='light'] .lp-module-button[aria-expanded='true'],
+:root[data-theme='light'] .ml-module-btn[aria-expanded='true'] {
+  background: var(--theme-primary-light) !important;
+  border-color: var(--theme-primary) !important;
+  color: var(--theme-primary-hover) !important;
+}

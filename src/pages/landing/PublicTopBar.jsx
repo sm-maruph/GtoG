@@ -10,6 +10,7 @@ import { ChevronDown, Grid3X3, LogOut, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../core/auth/AuthContext';
 import { MODULE_CATALOG } from '../../core/catalog';
 import logo from '../../assets/cbc_logo.png';
+import ThemeToggle from '../../core/theme/ThemeToggle';
 
 export default function PublicTopBar() {
   const { status, user, isSuperAdmin, logout } = useAuth();
@@ -33,6 +34,7 @@ export default function PublicTopBar() {
       </Link>
 
       <div className="lp-topbar-right">
+        <ThemeToggle />
         <div className="lp-module-menu">
           <button type="button" className="lp-module-button" onClick={() => setModulesOpen((value) => !value)} aria-expanded={modulesOpen}>
             <Grid3X3 size={15} />

@@ -3,15 +3,72 @@ import { Edit3, Plus, Search, Trash2 } from 'lucide-react';
 import { PageHeader, Panel } from '../../../core/ui';
 import { usePaper } from '../PprContext';
 import EntryModal from '../components/EntryModal';
+import EntryDetailsModal from '../components/EntryDetailsModal';
 
-const monthLabel = (value) => new Intl.DateTimeFormat('en-GB',{month:'long',year:'numeric'}).format(new Date(`${value}-01T00:00:00`));
+const monthLabel = (value) => new Intl.DateTimeFormat('en-GB', { month:'long', year:'numeric' }).format(new Date(`${value}-01T00:00:00`));
+
 export default function Entries() {
   const { entries, actions, can, directory, state } = usePaper();
-  const [editing,setEditing] = useState(null); const [q,setQ]=useState(''); const [from,setFrom]=useState(''); const [to,setTo]=useState(''); const [branch,setBranch]=useState('ALL'); const [dept,setDept]=useState('ALL'); const [paper,setPaper]=useState('ALL');
-  const rows=useMemo(()=>entries.filter((row)=>{
-    const hay=[row.branchName,row.deptName,row.printerCode,row.printerName,row.paperTypeName,row.remarks,row.recordedByName].join(' ').toLowerCase();
+  const [editing,setEditing] = useState(null);
+  const [viewing,setViewing] = useState(null);
+  const [q,setQ] = useState('');
+  const [from,setFrom] = useState('');
+  const [to,setTo] = useState('');
+  const [branch,setBranch] = useState('ALL');
+  const [dept,setDept] = useState('ALL');
+  const [paper,setPaper] = useState('ALL');
+  const rows = useMemo(() => entries.filter((row) => {
+    const hay = [row.branchName,row.deptName,row.printerCode,row.printerName,row.paperTypeName,row.remarks,row.recordedByName].join(' ').toLowerCase();
     return (!q||hay.includes(q.toLowerCase()))&&(!from||row.month>=from)&&(!to||row.month<=to)&&(branch==='ALL'||row.branchId===Number(branch))&&(dept==='ALL'||row.deptId===Number(dept))&&(paper==='ALL'||row.paperTypeId===Number(paper));
-  }).sort((a,b)=>b.month.localeCompare(a.month)||b.entryId-a.entryId),[entries,q,from,to,branch,dept,paper]);
-  function remove(row){if(!window.confirm(`Delete ${row.paperTypeName} usage for ${monthLabel(row.month)}?`))return;try{actions.deleteEntry(row.entryId)}catch(e){window.alert(e.message)}}
-  return <div className="ppr-page"><PageHeader title="Paper Usage Entries" subtitle={`${rows.length} of ${entries.length} visible records. Search, filter, correct, and maintain monthly printer counters.`}>{can('ppr.entry.create')&&<button className="btn btn-primary" onClick={()=>setEditing({})}><Plus size={15}/>Add entry</button>}</PageHeader><Panel padded={false}><div className="ppr-filter"><label className="ppr-search"><Search size={15}/><input value={q} onChange={(e)=>setQ(e.target.value)} placeholder="Search branch, department, printer, paper, remarks…"/></label><input type="month" value={from} onChange={(e)=>setFrom(e.target.value)} title="From month"/><input type="month" value={to} onChange={(e)=>setTo(e.target.value)} title="To month"/><select value={branch} onChange={(e)=>{setBranch(e.target.value);setDept('ALL')}}><option value="ALL">All branches</option>{directory.branches.map((b)=><option key={b.branchId} value={b.branchId}>{b.name}</option>)}</select><select value={dept} onChange={(e)=>setDept(e.target.value)}><option value="ALL">All departments</option>{directory.departments.filter((d)=>branch==='ALL'||d.branchId===Number(branch)).map((d)=><option key={d.deptId} value={d.deptId}>{d.name}</option>)}</select><select value={paper} onChange={(e)=>setPaper(e.target.value)}><option value="ALL">All paper types</option>{state.paperTypes.map((p)=><option key={p.paperTypeId} value={p.paperTypeId}>{p.name}</option>)}</select></div><div className="ppr-table-wrap"><table className="ui-table ppr-entries-table"><thead><tr><th>Month</th><th>Branch / Department</th><th>Printer</th><th>Paper Type</th><th>Starting</th><th>Ending</th><th>Total Used</th><th>In Hand</th><th>Next Month</th><th>Status</th><th>Remarks</th><th>Action</th></tr></thead><tbody>{rows.map((row)=><tr key={row.entryId}><td className="code">{monthLabel(row.month)}</td><td><strong>{row.branchName}</strong><small>{row.deptName}</small></td><td><span className="code">{row.printerCode}</span><small>{row.printerName}</small></td><td>{row.paperTypeName}</td><td className="code">{row.startingPageCount.toLocaleString()}</td><td className="code">{row.endingPageCount.toLocaleString()}</td><td><strong>{row.totalPagesUsed.toLocaleString()}</strong></td><td>{row.paperInHandQty.toLocaleString()} {row.paperInHandUnit}</td><td>{row.requisitionQty.toLocaleString()} {row.requisitionUnit}</td><td><span className={`ppr-status ${row.status.toLowerCase()}`}>{row.status}</span></td><td className="ppr-remarks">{row.remarks||'—'}</td><td><div className="ppr-actions">{can('ppr.entry.edit')&&<button title="Edit" onClick={()=>setEditing(row)}><Edit3 size={14}/></button>}{can('ppr.entry.delete')&&<button className="danger" title="Delete" onClick={()=>remove(row)}><Trash2 size={14}/></button>}</div></td></tr>)}</tbody></table></div>{rows.length===0&&<div className="ppr-empty">No paper usage records match these filters.</div>}</Panel>{editing&&<EntryModal row={editing.entryId?editing:null} onClose={()=>setEditing(null)}/>}</div>;
+  }).sort((a,b) => b.month.localeCompare(a.month)||b.entryId-a.entryId), [entries,q,from,to,branch,dept,paper]);
+
+  function remove(row) {
+    if (!window.confirm(`Delete ${row.paperTypeName} usage for ${monthLabel(row.month)}?`)) return;
+    try { actions.deleteEntry(row.entryId); } catch (error) { window.alert(error.message); }
+  }
+  function openFromKeyboard(event,row) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      setViewing(row);
+    }
+  }
+
+  return <div className="ppr-page">
+    <PageHeader title="Paper Usage Entries" subtitle={`${rows.length} of ${entries.length} visible records. Search, filter, correct, and maintain monthly printer counters.`}>
+      {can('ppr.entry.create') && <button className="btn btn-primary" onClick={()=>setEditing({})}><Plus size={15}/>Add entry</button>}
+    </PageHeader>
+    <Panel padded={false}>
+      <div className="ppr-filter">
+        <label className="ppr-search"><Search size={15}/><input value={q} onChange={(e)=>setQ(e.target.value)} placeholder="Search branch, department, printer, paper, remarks…"/></label>
+        <input type="month" value={from} onChange={(e)=>setFrom(e.target.value)} title="From month"/>
+        <input type="month" value={to} onChange={(e)=>setTo(e.target.value)} title="To month"/>
+        <select value={branch} onChange={(e)=>{setBranch(e.target.value);setDept('ALL')}}><option value="ALL">All branches</option>{directory.branches.map((b)=><option key={b.branchId} value={b.branchId}>{b.name}</option>)}</select>
+        <select value={dept} onChange={(e)=>setDept(e.target.value)}><option value="ALL">All departments</option>{directory.departments.filter((d)=>branch==='ALL'||d.branchId===Number(branch)).map((d)=><option key={d.deptId} value={d.deptId}>{d.name}</option>)}</select>
+        <select value={paper} onChange={(e)=>setPaper(e.target.value)}><option value="ALL">All paper types</option>{state.paperTypes.map((p)=><option key={p.paperTypeId} value={p.paperTypeId}>{p.name}</option>)}</select>
+      </div>
+      <div className="ppr-table-wrap"><table className="ui-table ppr-entries-table">
+        <thead><tr><th>Month</th><th>Branch / Department</th><th>Printer</th><th>Paper Type</th><th>Starting</th><th>Ending</th><th>Total Used</th><th>In Hand</th><th>Next Month</th><th>Status</th><th>Remarks</th><th>Action</th></tr></thead>
+        <tbody>{rows.map((row) => <tr key={row.entryId} className="ppr-entry-row" tabIndex="0" onClick={()=>setViewing(row)} onKeyDown={(event)=>openFromKeyboard(event,row)}>
+          <td className="code">{monthLabel(row.month)}</td>
+          <td><strong>{row.branchName}</strong><small>{row.deptName}</small></td>
+          <td><span className="code">{row.printerCode}</span><small>{row.printerName}</small></td>
+          <td>{row.paperTypeName}</td>
+          <td className="code">{row.startingPageCount.toLocaleString()}</td>
+          <td className="code">{row.endingPageCount.toLocaleString()}</td>
+          <td><strong>{row.totalPagesUsed.toLocaleString()}</strong></td>
+          <td>{row.paperInHandQty.toLocaleString()} {row.paperInHandUnit}</td>
+          <td>{row.requisitionQty.toLocaleString()} {row.requisitionUnit}</td>
+          <td><span className={`ppr-status ${row.status.toLowerCase()}`}>{row.status}</span></td>
+          <td className="ppr-remarks">{row.remarks||'—'}</td>
+          <td onClick={(event)=>event.stopPropagation()} onKeyDown={(event)=>event.stopPropagation()}><div className="ppr-actions">
+            {can('ppr.entry.edit')&&<button title="Edit" onClick={()=>setEditing(row)}><Edit3 size={14}/></button>}
+            {can('ppr.entry.delete')&&<button className="danger" title="Delete" onClick={()=>remove(row)}><Trash2 size={14}/></button>}
+          </div></td>
+        </tr>)}</tbody>
+      </table></div>
+      {rows.length===0&&<div className="ppr-empty">No paper usage records match these filters.</div>}
+    </Panel>
+    {viewing&&<EntryDetailsModal row={viewing} onClose={()=>setViewing(null)}/>}
+    {editing&&<EntryModal row={editing.entryId?editing:null} onClose={()=>setEditing(null)}/>}
+  </div>;
 }

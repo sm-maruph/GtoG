@@ -10,6 +10,7 @@ export function AdminProvider({children}){
     addBranch:wrap(access.addBranch),updateBranch:wrap(access.updateBranch),deleteBranch:wrap(access.deleteBranch),
     addDepartment:wrap(access.addDepartment),updateDepartment:wrap(access.updateDepartment),deleteDepartment:wrap(access.deleteDepartment),
     addRole:wrap(access.addRole),updateRole:wrap(access.updateRole),deleteRole:wrap(access.deleteRole),
+    addGroup:wrap(access.addGroup),updateGroup:wrap(access.updateGroup),deleteGroup:wrap(access.deleteGroup),
     addUser:wrap(access.addUser),updateUser:wrap(access.updateUser),deleteUser:wrap(access.deleteUser),
     updateUserPermissions:wrap(access.updateUserPermissions),reset:()=>{const r=access.resetAccessState(actor);setState(r);return r},
   }),[actor,refresh]);

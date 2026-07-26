@@ -42,7 +42,7 @@ export default function CredentialsForm({ onSubmit, submitLabel = 'Sign in' }) {
       )}
 
       <label className="field">
-        <span>Network username</span>
+        <span>Lan ID</span>
         <input
           type="text"
           value={username}

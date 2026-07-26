@@ -9,9 +9,19 @@ export default function Access() {
   const [userId, setUserId] = useState(initial?.userId || '');
   const [draft, setDraft] = useState(initial?.directPermissions || []);
   const user = state.users.find((row) => row.userId === Number(userId));
-  const rolePermissions = useMemo(() => new Set(
-    state.roles.filter((role) => user?.roleIds.includes(role.roleId)).flatMap((role) => role.permissions.map((permission) => permission.code))
-  ), [state.roles, user]);
+  const userGroups = useMemo(() => state.groups.filter((group) =>
+    user?.groupIds?.includes(group.groupId) || group.userIds.includes(user?.userId)
+  ), [state.groups, user]);
+  const inheritedPermissions = useMemo(() => {
+    const effectiveRoleIds = new Set([...(user?.roleIds || []), ...userGroups.flatMap((group) => group.roleIds)]);
+    const codes = new Set(state.roles.filter((role) => effectiveRoleIds.has(role.roleId))
+      .flatMap((role) => role.permissions.filter((permission) => permission.allowed !== false).map((permission) => permission.code)));
+    userGroups.forEach((group) => group.permissions.forEach((permission) => {
+      if (permission.allowed === false) codes.delete(permission.code);
+      else codes.add(permission.code);
+    }));
+    return codes;
+  }, [state.roles, user, userGroups]);
   const groups = useMemo(() => moduleDefinitions.map((module) => ({
     ...module,
     permissions: permissionDefinitions.filter((permission) => permission.module === module.code),
@@ -68,12 +78,12 @@ export default function Access() {
     </PageHeader>
     <Panel><div className="adm-access-head">
       <label><span>User</span><select value={userId} onChange={(event) => selectUser(event.target.value)}>{state.users.map((row) => <option key={row.userId} value={row.userId}>{row.displayName} — {row.username}</option>)}</select></label>
-      {user && <div><strong>{user.displayName}</strong><span>{user.isSuperAdmin ? 'Super Admin automatically has every permission at GLOBAL scope.' : `${user.roleIds.length} role(s) · ${draft.length} direct override(s)`}</span></div>}
+      {user && <div><strong>{user.displayName}</strong><span>{user.isSuperAdmin ? 'Super Admin automatically has every permission at GLOBAL scope.' : `${user.roleIds.length} direct role(s) · ${userGroups.length} group(s) · ${draft.length} direct override(s)`}</span></div>}
     </div></Panel>
     {user?.isSuperAdmin ? <Panel><div className="adm-empty">Super Admin access cannot be reduced from this page.</div></Panel> : <div className="adm-permission-groups adm-access-groups">{groups.map((group) => <section key={group.code}><h3>{group.name}</h3>{group.permissions.map((definition) => {
       const permission = direct(definition.code);
       return <div key={definition.code} className="adm-access-row">
-        <div><strong>{definition.label}</strong><small className="code">{definition.code}</small>{rolePermissions.has(definition.code) && <em>Granted by assigned role</em>}</div>
+        <div><strong>{definition.label}</strong><small className="code">{definition.code}</small>{inheritedPermissions.has(definition.code) && <em>Inherited from role or group</em>}</div>
         <select value={mode(definition.code)} onChange={(event) => changeMode(definition.code, event.target.value)}><option value="INHERIT">Inherit</option><option value="ALLOW">Allow</option><option value="DENY">Deny</option></select>
         <select disabled={!permission || permission.allowed === false} value={permission?.scopeType || 'SELF'} onChange={(event) => changeScope(definition.code, event.target.value)}><option>SELF</option><option>BRANCH</option><option>DEPT</option><option>GLOBAL</option></select>
         {permission?.allowed !== false && permission?.scopeType === 'BRANCH' && <select className="adm-target-select" value={permission.branchIds?.[0] || ''} onChange={(event) => changeTarget(definition.code, 'branchIds', event.target.value)}><option value="">User's assigned branch</option>{state.branches.filter((branch) => branch.status === 'ACTIVE').map((branch) => <option key={branch.branchId} value={branch.branchId}>{branch.name}</option>)}</select>}

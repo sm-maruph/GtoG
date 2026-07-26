@@ -108,7 +108,7 @@ export function analytics(state, branchCode = 'ALL') {
   const months = lastMonths();
   const byMonth = (rows, valueKey, dateKey) => months.map((m) => rows.filter((r) => String(r[dateKey]).slice(0,7) === m).reduce((a,r) => a + Number(r[valueKey] || 0), 0));
   return {
-    runs, fuel, elec, wasa, deliveries: del, waterBills: wb,
+    runs, fuel, elec, wasaBills: wasa, deliveries: del, waterBills: wb,
     generator: { weeklyHours: runs.filter((r) => daysAgo(r.date) <= 7).reduce((a,r)=>a+Number(r.runHours||0),0), monthlyHours: monthlyRuns.reduce((a,r)=>a+Number(r.runHours||0),0), yearlyHours: runs.filter((r)=>daysAgo(r.date)<=365).reduce((a,r)=>a+Number(r.runHours||0),0), monthlyFuel: monthlyRuns.reduce((a,r)=>a+(Number(r.fuelActual)||Number(r.fuelEst)||0),0), fuelInHand: Math.max(0,bought90-used90) },
     electricity: { lastBill: elec[0]?.amount || 0, totalKwh: elec.reduce((a,r)=>a+Number(r.kwh||0),0), avgRate: elec.length?elec.reduce((a,r)=>a+Number(r.rate||0),0)/elec.length:0 },
     wasa: { lastBill: wasa[0]?.amount || 0, totalUnits: wasa.reduce((a,r)=>a+Number(r.units||0),0), avgRate: wasa.length?wasa.reduce((a,r)=>a+Number(r.rate||0),0)/wasa.length:0 },
