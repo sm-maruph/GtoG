@@ -1,0 +1,38 @@
+.rep-range {
+  display: flex; align-items: flex-end; gap: var(--sp-3);
+  padding: var(--sp-3); margin-bottom: var(--sp-4);
+  background: var(--white); border: 1px solid var(--ink-200); border-radius: var(--radius-lg);
+}
+.rep-range label {
+  display: flex; flex-direction: column; gap: 4px;
+  font-size: var(--text-xs); font-weight: 600; color: var(--ink-500);
+  text-transform: uppercase; letter-spacing: 0.03em;
+}
+.rep-range input {
+  padding: 7px 10px; border: 1px solid var(--ink-300); border-radius: var(--radius);
+  font: inherit; font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--ink-900);
+}
+
+.rep-charts {
+  display: grid; gap: var(--sp-3);
+  grid-template-columns: 1fr 1fr; margin-bottom: var(--sp-4);
+}
+@media (max-width: 720px) { .rep-charts { grid-template-columns: 1fr; } }
+
+.rep-print-head { margin-bottom: var(--sp-4); }
+.rep-print-head h1 { margin: 0 0 4px; font-size: var(--text-xl); }
+.rep-print-head p { margin: 0; font-size: var(--text-sm); color: var(--ink-500); }
+
+.only-print { display: none; }
+
+/* ---- Print: turn the report section into a clean PDF ---------------------- */
+@media print {
+  /* Hide the app chrome and everything outside the report */
+  .ml-header, .no-print { display: none !important; }
+  .only-print { display: block !important; }
+  .ml-content { padding: 0 !important; max-width: none !important; }
+  .ui-panel { box-shadow: none; border-color: var(--ink-300); break-inside: avoid; }
+  .ui-stat { box-shadow: none; }
+  body { background: var(--white); }
+  @page { margin: 16mm; }
+}

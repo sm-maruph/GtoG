@@ -1,0 +1,89 @@
+.login {
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: var(--sp-5);
+  padding: var(--sp-5);
+  /* Deep brand blue, lifted by a single soft green bloom in the corner —
+     the logo's two colours and nothing else. */
+  background:
+    radial-gradient(900px 500px at 88% 8%, rgba(108, 190, 69, 0.16), transparent 62%),
+    radial-gradient(700px 500px at 8% 92%, rgba(10, 109, 196, 0.35), transparent 60%),
+    var(--cbc-blue-900);
+}
+
+.login-panel {
+  width: 100%;
+  max-width: 384px;
+  padding: var(--sp-6);
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.login-brand {
+  display: flex; align-items: center; gap: var(--sp-3);
+  padding-bottom: var(--sp-4);
+  margin-bottom: var(--sp-5);
+  border-bottom: 1px solid var(--ink-200);
+}
+.login-mark {
+  width: 32px; height: 32px; flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  background: var(--cbc-blue-600);
+  border-bottom: 4px solid var(--cbc-green-500);
+}
+.login-brand strong { display: block; font-size: var(--text-sm); font-weight: 600; letter-spacing: -0.01em; }
+.login-brand span {
+  display: block; font-size: 10px; color: var(--ink-400);
+  text-transform: uppercase; letter-spacing: 0.08em;
+}
+
+.login-title { margin: 0 0 var(--sp-1); font-size: var(--text-xl); font-weight: 600; letter-spacing: -0.02em; }
+.login-sub { margin: 0 0 var(--sp-5); font-size: var(--text-sm); color: var(--ink-500); }
+
+.login-submit { width: 100%; justify-content: center; padding: 10px; margin-top: var(--sp-1); }
+
+.login-help {
+  margin: var(--sp-5) 0 0;
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--ink-200);
+  font-size: var(--text-xs);
+  line-height: 1.55;
+  color: var(--ink-500);
+}
+
+.login-foot {
+  font-size: var(--text-xs);
+  line-height: 1.6;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* ---- Contextual (per-system) login extras -------------------------------- */
+.login-back {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-bottom: var(--sp-4);
+  font-size: var(--text-xs); font-weight: 600;
+  color: var(--ink-500); text-decoration: none;
+}
+.login-back:hover { color: var(--cbc-blue-600); }
+
+.login-context {
+  display: flex; align-items: center; gap: var(--sp-3);
+  padding: var(--sp-3);
+  margin-bottom: var(--sp-5);
+  background: var(--cbc-blue-50);
+  border: 1px solid var(--cbc-blue-100);
+  border-radius: var(--radius);
+}
+.login-context-icon {
+  display: grid; place-items: center; flex-shrink: 0;
+  width: 40px; height: 40px; border-radius: var(--radius);
+  background: var(--cbc-blue-600); color: var(--white);
+}
+.login-context-code {
+  display: block; font-size: 10px; font-weight: 600;
+  color: var(--cbc-blue-500); letter-spacing: 0.04em;
+}
+.login-context-name { display: block; font-size: var(--text-sm); font-weight: 600; color: var(--cbc-blue-900); }

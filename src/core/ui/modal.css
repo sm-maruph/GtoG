@@ -1,0 +1,51 @@
+.ui-modal-backdrop {
+  position: fixed; inset: 0; z-index: 50;
+  display: grid; place-items: center;
+  padding: var(--sp-4);
+  background: rgba(15, 23, 42, 0.5);
+  animation: ui-modal-fade 0.12s ease;
+}
+@keyframes ui-modal-fade { from { opacity: 0; } to { opacity: 1; } }
+
+.ui-modal {
+  width: 100%;
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  display: flex; flex-direction: column;
+  max-height: calc(100vh - 2 * var(--sp-4));
+}
+.ui-modal-sm { max-width: 420px; }
+.ui-modal-md { max-width: 560px; }
+.ui-modal-lg { max-width: 720px; }
+
+.ui-modal-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--sp-4);
+  border-bottom: 1px solid var(--ink-200);
+}
+.ui-modal-title { margin: 0; font-size: var(--text-md); font-weight: 600; }
+.ui-modal-close {
+  display: grid; place-items: center;
+  width: 30px; height: 30px; border-radius: var(--radius);
+  border: 0; background: transparent; color: var(--ink-500); cursor: pointer;
+}
+.ui-modal-close:hover { background: var(--ink-100); color: var(--ink-900); }
+
+.ui-modal-body { padding: var(--sp-4); overflow-y: auto; }
+.ui-modal-foot {
+  display: flex; justify-content: flex-end; gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4);
+  border-top: 1px solid var(--ink-200);
+}
+
+/* Summary block reused inside confirm/decline dialogs */
+.ui-modal-summary {
+  padding: var(--sp-3); margin-bottom: var(--sp-4);
+  background: var(--ink-50); border: 1px solid var(--ink-200); border-radius: var(--radius);
+  font-size: var(--text-sm);
+}
+.ui-modal-summary-row { display: flex; gap: var(--sp-3); padding: 3px 0; }
+.ui-modal-summary-row span:first-child { flex: 0 0 96px; color: var(--ink-500); }
+.ui-modal-summary-row span:last-child { font-weight: 500; }
+.ui-modal-xl{max-width:min(1180px,96vw)}

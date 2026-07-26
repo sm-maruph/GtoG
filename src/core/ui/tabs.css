@@ -1,0 +1,72 @@
+/* =============================================================================
+   TABS  —  standalone stylesheet.
+   If these styles aren't loading, it's because the .ui-tabs block never made it
+   into ui.css. This file removes that risk: import it directly from Tabs.jsx
+   (`import './tabs.css'`) and the styles travel with the component.
+   Safe to keep even if ui.css also has the block — identical rules, last wins.
+   ============================================================================= */
+
+.ui-tabs {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--ink-200);
+  margin-bottom: var(--sp-5);
+}
+
+.ui-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 10px var(--sp-3);
+  border: 0;                       /* kill the default button border you're seeing */
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--ink-500);
+  margin-bottom: -1px;             /* sit the active underline on the container border */
+  white-space: nowrap;
+  transition: color 0.12s ease, border-color 0.12s ease;
+}
+
+.ui-tab:hover { color: var(--ink-900); }
+
+.ui-tab.is-active {
+  color: var(--cbc-blue-700);
+  border-bottom-color: var(--cbc-blue-600);
+  font-weight: 600;
+}
+
+.ui-tab:focus-visible {
+  outline: 2px solid var(--cbc-blue-600);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Count badge — the reason "Pending2" runs together is this rule missing */
+.ui-tab-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--ink-100);
+  color: var(--ink-500);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.ui-tab.is-active .ui-tab-count {
+  background: var(--cbc-blue-100);
+  color: var(--cbc-blue-700);
+}
+
+.ui-tab-count-pending {
+  background: var(--warn-50);
+  color: var(--warn-600);
+}

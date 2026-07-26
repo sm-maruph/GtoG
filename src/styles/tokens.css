@@ -1,0 +1,171 @@
+/* =============================================================================
+   CBC PORTAL - DESIGN TOKENS
+   Fonts are bundled via @fontsource, never fetched from a CDN. This box lives
+   on a private LAN with no route to fonts.googleapis.com — a webfont <link>
+   would hang for 30s and then fall back to Times New Roman.
+   ============================================================================= */
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/500.css';
+
+:root {
+  /* --- Brand: taken from the CBC mark ------------------------------------ */
+  --cbc-blue-900: #071426;
+  --cbc-blue-800: #0c3158;
+  --cbc-blue-700: #3b94ea;
+  --cbc-blue-600: #247fd8;   /* primary action */
+  --cbc-blue-500: #52a4f4;
+  --cbc-blue-100: #274767;
+  --cbc-blue-50:  #162d45;
+
+  --cbc-green-700: #83d360;
+  --cbc-green-600: #67bd44;
+  --cbc-green-500: #73c94f;  /* the logo underline */
+  --cbc-green-50:  #183422;
+
+  /* --- Neutrals ---------------------------------------------------------- */
+  --ink-900: #eef4fb;
+  --ink-700: #c7d4e4;
+  --ink-500: #93a6bd;
+  --ink-400: #72859c;
+  --ink-300: #40526a;
+  --ink-200: #293a50;
+  --ink-100: #1d2b3d;
+  --ink-50:  #09111e;
+  --white:   #111c2c;
+
+  /* --- Status: workflow states need to be readable at a glance ----------- */
+  --status-draft:    #64748b;
+  --status-pending:  #b45309;
+  --status-approved: #4e9a2a;
+  --status-rejected: #b91c1c;
+  --status-active:   #0057a8;
+  --status-done:     #475569;
+
+  --danger-600:  #b91c1c;
+  --danger-50:   #3a1d25;
+  --warn-600:    #b45309;
+  --warn-50:     #3b2b14;
+
+  /* --- Type -------------------------------------------------------------- */
+  --font-ui:   'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* Codes, IDs, reg numbers, timestamps. This system is made of identifiers;
+     they get tabular figures so they align down a column. */
+  --font-mono: 'JetBrains Mono', 'Consolas', ui-monospace, monospace;
+
+  --text-xs:   0.75rem;
+  --text-sm:   0.8125rem;
+  --text-base: 0.875rem;   /* dense tool: 14px body, not 16px */
+  --text-md:   1rem;
+  --text-lg:   1.125rem;
+  --text-xl:   1.375rem;
+  --text-2xl:  1.75rem;
+
+  /* --- Space / shape ----------------------------------------------------- */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 24px; --sp-6: 32px; --sp-7: 48px;
+
+  --radius-sm: 4px;
+  --radius:    6px;
+  --radius-lg: 10px;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.28);
+  --shadow:    0 8px 22px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 18px 48px rgba(0, 0, 0, 0.42);
+
+  --sidebar-w: 248px;
+  --header-h:  56px;
+
+  --focus-ring: 0 0 0 3px var(--cbc-blue-100);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: var(--text-base);
+  line-height: 1.5;
+  color: var(--ink-900);
+  background: var(--ink-50);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Identifiers: mono + tabular so VBS-2026-000123 lines up with its neighbours */
+.code {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.9em;
+  letter-spacing: -0.01em;
+}
+
+/* Quality floor: keyboard focus must always be visible. Never remove this. */
+:focus-visible {
+  outline: 2px solid var(--cbc-blue-600);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* --- Primitives ---------------------------------------------------------- */
+.btn {
+  display: inline-flex; align-items: center; gap: var(--sp-2);
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  font: inherit; font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.btn-primary { background: var(--cbc-blue-600); color: var(--white); }
+.btn-primary:hover:not(:disabled) { background: var(--cbc-blue-700); }
+.btn-ghost { background: transparent; color: var(--ink-700); border-color: var(--ink-200); }
+.btn-ghost:hover:not(:disabled) { background: var(--ink-100); }
+
+.field { display: block; margin-bottom: var(--sp-4); }
+.field label {
+  display: block; margin-bottom: var(--sp-2);
+  font-size: var(--text-xs); font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.04em;
+  color: var(--ink-500);
+}
+.field input {
+  width: 100%; padding: 10px 12px;
+  border: 1px solid var(--ink-300); border-radius: var(--radius);
+  font: inherit; color: var(--ink-900); background: var(--white);
+}
+.field input:focus { outline: none; border-color: var(--cbc-blue-600); box-shadow: var(--focus-ring); }
+
+.card {
+  background: var(--white);
+  border: 1px solid var(--ink-200);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Errors state what happened and what to do. They don't apologise. */
+.alert-error {
+  display: flex; gap: var(--sp-2); align-items: flex-start;
+  padding: var(--sp-3);
+  background: var(--danger-50);
+  border: 1px solid #fecaca;
+  border-left: 3px solid var(--danger-600);
+  border-radius: var(--radius);
+  color: #7f1d1d;
+  font-size: var(--text-sm);
+}
+.vbs-fleet-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.vbs-master-status{display:inline-flex;padding:3px 7px;border-radius:999px;font-size:9px;font-weight:800}.vbs-master-status.available,.vbs-master-status.active{background:var(--cbc-green-50);color:var(--cbc-green-700)}.vbs-master-status.maintenance,.vbs-master-status.on_leave{background:var(--warn-50);color:#e7a43a}.vbs-master-status.inactive{background:var(--danger-50);color:#ee8492}@media(max-width:900px){.vbs-fleet-grid{grid-template-columns:1fr}}
+.btn-secondary{background:var(--ink-100);color:var(--ink-900);border-color:var(--ink-300)}.btn-secondary:hover:not(:disabled){background:var(--ink-200);border-color:var(--ink-400)}.btn-danger{background:var(--danger-600);color:#fff;border-color:var(--danger-600)}.btn-small{padding:5px 8px;font-size:var(--text-xs)}
+.alert-error{color:#f2a1ae;border-color:#6b2a39;background:#321a22}.alert-success{display:flex;gap:var(--sp-2);padding:var(--sp-3);border:1px solid #285d3a;border-left:3px solid var(--cbc-green-600);border-radius:var(--radius);background:#153221;color:#9be37e;font-size:var(--text-sm)}

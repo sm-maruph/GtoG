@@ -1,0 +1,5 @@
+export function InvPage({title,subtitle,actions,children}){return <div className="inv-page"><header className="inv-page-head"><div><h1>{title}</h1><p>{subtitle}</p></div>{actions&&<div className="inv-page-actions">{actions}</div>}</header>{children}</div>}
+export function InvCard({title,action,className='',children}){return <section className={`inv-card ${className}`}>{(title||action)&&<header>{title&&<h2>{title}</h2>}{action}</header>}<div className="inv-card-body">{children}</div></section>}
+export function InvStat({label,value,hint,icon,tone='blue'}){return <div className={`inv-stat ${tone}`}><span>{icon}</span><div><strong>{value}</strong><small>{label}</small>{hint&&<em>{hint}</em>}</div></div>}
+export function Field({label,children,full=false}){return <label className={`inv-field${full?' full':''}`}><span>{label}</span>{children}</label>}
+export function Status({value}){const cls=String(value||'').toLowerCase().replaceAll('_','-');return <span className={`inv-status inv-status-${cls}`}>{String(value||'').replaceAll('_',' ')}</span>}

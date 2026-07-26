@@ -1,0 +1,15 @@
+import { useMemo, useState } from 'react';
+import { Eye } from 'lucide-react';
+import { PageHeader, Panel, StatTile } from '../../../core/ui';
+import { useInsurance } from '../InsContext';
+import { companyRows } from '../analytics';
+import { formatMoney } from '../format';
+import PolicyListModal from '../components/PolicyListModal';
+
+export default function StatsScreen(){
+  const {policies,state,isAdmin,units}=useInsurance(); const aggregate=companyRows(policies); const [unit,setUnit]=useState('ALL'); const [company,setCompany]=useState(null);
+  const unitPolicies=useMemo(()=>unit==='ALL'?policies:state.policies.filter((p)=>p.unitCode===unit),[unit,policies,state.policies]); const breakdown=companyRows(unitPolicies); const total=policies.reduce((s,p)=>s+Number(p.amount||0),0);
+  const currentRows=unit==='ALL'?policies:unitPolicies;
+  return <div><PageHeader title="Insurance Stats" subtitle="Company-wise portfolio exposure, concentration, and borrower detail."/><div className="ui-stat-grid ins-stats-summary"><StatTile label="Total portfolio exposure" value={formatMoney(total)} hint={`${policies.length} policies`} /></div><Panel title="Aggregate Exposure" padded={false}><ExposureTable rows={aggregate} onView={(name)=>setCompany({name,policies:policies.filter((p)=>p.company===name)})}/></Panel>{isAdmin&&<Panel title="Unit Breakdown" action={<select className="ins-inline-select" value={unit} onChange={(e)=>setUnit(e.target.value)}><option value="ALL">All Units</option>{units.map((u)=><option key={u.code} value={u.code}>{u.name}</option>)}</select>} padded={false}><ExposureTable rows={breakdown} onView={(name)=>setCompany({name,policies:currentRows.filter((p)=>p.company===name)})}/></Panel>}{company&&<PolicyListModal title={`${company.name} — portfolio details`} subtitle="Borrowers and policies included in this company exposure." policies={company.policies} onClose={()=>setCompany(null)}/>}</div>;
+}
+function ExposureTable({rows,onView}){const totals=rows.reduce((a,r)=>({policies:a.policies+r.totalPolicies,expired:a.expired+r.expired,within:a.within+r.within15,exposure:a.exposure+r.totalExposure}),{policies:0,expired:0,within:0,exposure:0});return <div className="ins-table-wrap"><table className="ui-table"><thead><tr><th>Insurance Company</th><th>Total Policies</th><th>Expired</th><th>≤15 Days</th><th>Total Exposure</th><th>Portfolio Share</th><th>View</th></tr></thead><tbody>{rows.map((r)=><tr key={r.company}><td><strong>{r.company}</strong></td><td>{r.totalPolicies}</td><td>{r.expired}</td><td>{r.within15}</td><td>{formatMoney(r.totalExposure)}</td><td><div className="ins-share"><div><span style={{width:`${r.share}%`}}/></div><strong>{r.share.toFixed(1)}%</strong></div></td><td><button className="icon-btn" title="View company policies" onClick={()=>onView(r.company)}><Eye size={15}/></button></td></tr>)}</tbody><tfoot><tr><th>Total portfolio</th><th>{totals.policies}</th><th>{totals.expired}</th><th>{totals.within}</th><th>{formatMoney(totals.exposure)}</th><th>100%</th><th/></tr></tfoot></table></div>}

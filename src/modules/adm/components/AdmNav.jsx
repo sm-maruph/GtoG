@@ -1,0 +1,5 @@
+import { NavLink } from 'react-router-dom';
+import { Building2, Gauge, History, KeyRound, ShieldCheck, UsersRound } from 'lucide-react';
+import { useAuth } from '../../../core/auth/AuthContext';
+const links=[['/super-admin',Gauge,'Dashboard',true],['/super-admin/organization',Building2,'Organisation'],['/super-admin/users',UsersRound,'Portal Users'],['/super-admin/roles',ShieldCheck,'Roles'],['/super-admin/access',KeyRound,'Granular Access'],['/super-admin/audit',History,'Global Audit']];
+export default function AdmNav(){const {user}=useAuth();return <aside className="adm-side"><div className="adm-brand"><span><ShieldCheck size={21}/></span><div><strong>Super Admin</strong><small>Portal Governance</small></div></div><div className="adm-user"><strong>{user?.displayName}</strong><small>{user?.employeeId} · Global access</small></div><nav>{links.map(([to,Icon,label,end])=><NavLink key={to} to={to} end={end} className={({isActive})=>isActive?'active':''}><Icon size={16}/><span>{label}</span></NavLink>)}</nav><div className="adm-side-note">Changes affect access to every operational module.</div></aside>}

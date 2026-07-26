@@ -1,0 +1,36 @@
+.tl { list-style: none; margin: 0; padding: 0; position: relative; }
+.tl-item {
+  position: relative;
+  display: flex; gap: var(--sp-3);
+  padding: 0 0 var(--sp-4) var(--sp-1);
+}
+/* Connector line down the dots */
+.tl-item:not(:last-child)::before {
+  content: ''; position: absolute;
+  left: 12px; top: 24px; bottom: 0;
+  width: 2px; background: var(--ink-200);
+}
+.tl-dot {
+  position: relative; z-index: 1; flex-shrink: 0;
+  display: grid; place-items: center;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--ink-100); color: var(--ink-500);
+  border: 2px solid var(--white);
+  box-shadow: 0 0 0 1px var(--ink-200);
+}
+.tl-ok  .tl-dot { background: var(--cbc-green-50);  color: var(--cbc-green-700); box-shadow: 0 0 0 1px #d7edc9; }
+.tl-bad .tl-dot { background: var(--danger-50);     color: var(--danger-600);    box-shadow: 0 0 0 1px #fecaca; }
+.tl-neutral .tl-dot { background: var(--cbc-blue-50); color: var(--cbc-blue-600); box-shadow: 0 0 0 1px var(--cbc-blue-100); }
+.tl-muted .tl-dot { background: var(--ink-100); color: var(--ink-400); }
+
+.tl-body { padding-top: 2px; min-width: 0; }
+.tl-label { font-size: var(--text-sm); font-weight: 600; color: var(--ink-900); }
+.tl-meta {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+  margin-top: 2px; font-size: var(--text-xs); color: var(--ink-500);
+}
+.tl-sep { color: var(--ink-300); }
+.tl-gap {
+  margin-left: 4px; padding: 1px 7px; border-radius: 999px;
+  background: var(--ink-100); color: var(--ink-500); font-size: 11px;
+}

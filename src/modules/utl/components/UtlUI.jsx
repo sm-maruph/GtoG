@@ -1,0 +1,4 @@
+export function UtlPage({ title, subtitle, actions, children }) { return <div className="utl-page"><header className="utl-page-head"><div><h1>{title}</h1><p>{subtitle}</p></div>{actions&&<div className="utl-page-actions">{actions}</div>}</header>{children}</div>; }
+export function UtlCard({ title, action, className='', children }) { return <section className={`utl-card ${className}`}><header><h2>{title}</h2>{action}</header><div className="utl-card-body">{children}</div></section>; }
+export function UtlStat({ label, value, icon, tone='blue', hint }) { return <div className={`utl-stat ${tone}`}><span className="utl-stat-icon">{icon}</span><div><strong>{value}</strong><span>{label}</span>{hint&&<small>{hint}</small>}</div></div>; }
+export function Field({label,children}){return <label className="utl-field"><span>{label}</span>{children}</label>}
