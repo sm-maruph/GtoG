@@ -1,7 +1,7 @@
 /** Central catalogue for every portal module. */
 import {
   Car, Boxes, Gauge, GraduationCap, Lightbulb, ClipboardList,
-  FileStack, ShieldCheck, ContactRound, CalendarClock,
+  FileStack, ShieldCheck, ContactRound, CalendarClock, PackageSearch,
   Megaphone,
 } from 'lucide-react';
 
@@ -47,6 +47,12 @@ export const MODULE_CATALOG = [
     blurb: 'Control stationery requisitions, FIFO stock, dispatch, receipts, and branch consumption.',
     category: 'Operations', icon: Boxes, routePath: '/inventory',
     welcome: 'Welcome to Stationery Inventory Management. Create monthly requisitions, complete approvals, dispatch stock, and track consumption.',
+  },
+  {
+    code: 'prc', name: 'Procurement & Asset Inventory',
+    blurb: 'Manage RFQs, vendors, tenders, work orders, general stock, fixed assets, and compliance.',
+    category: 'Operations', icon: PackageSearch, routePath: '/procurement-inventory',
+    welcome: 'Welcome to Procurement & Asset Inventory. Control sourcing, purchasing, stock, assets, and audit from one workspace.',
   },
   {
     code: 'ppr', name: 'Paper Usage Tracker',

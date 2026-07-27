@@ -17,6 +17,7 @@ const MODULE_COMPONENTS = {
   exb: lazy(() => import('../modules/exb/ExbModule.jsx')),
   vbs: lazy(() => import('../modules/vbs/VbsModule.jsx')),
   inv: lazy(() => import('../modules/inv/InvModule.jsx')),
+  prc: lazy(() => import('../modules/prc/PrcModule.jsx')),
   utl: lazy(() => import('../modules/utl/UtlModule.jsx')),
   ins: lazy(() => import('../modules/ins/InsModule.jsx')),
   ppr: lazy(() => import('../modules/ppr/PprModule.jsx')),

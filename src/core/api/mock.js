@@ -185,6 +185,7 @@ const USERS = {
    can exercise the new monthly requisition workflow. */
 const INS_MODULE = { moduleId: 6, code: 'ins', name: 'Insurance Management Tracker', icon: 'clipboard-list', routePath: '/insurance', sortOrder: 10 };
 const INV_MODULE = { moduleId: 2, code: 'inv', name: 'Stationery Inventory Management', icon: 'boxes', routePath: '/inventory', sortOrder: 30 };
+const PRC_MODULE = { moduleId: 8, code: 'prc', name: 'Procurement & Asset Inventory', icon: 'package-search', routePath: '/procurement-inventory', sortOrder: 35 };
 const UTL_MODULE = { moduleId: 3, code: 'utl', name: 'Utility Tracker', icon: 'gauge', routePath: '/utility', sortOrder: 40 };
 
 function addInventoryPermissions() {
@@ -198,7 +199,7 @@ function addInventoryPermissions() {
   };
 
   for (const record of Object.values(USERS)) {
-    record.me.modules = [INS_MODULE, VBS_MODULE, INV_MODULE, UTL_MODULE];
+    record.me.modules = [INS_MODULE, VBS_MODULE, INV_MODULE, PRC_MODULE, UTL_MODULE];
   }
 
   Object.assign(USERS['branch.user'].me.permissions, selfPermissions);
