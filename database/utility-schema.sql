@@ -1,153 +1,74 @@
-/* CBC Utility Tracker - SQL Server reference schema.
-   Integrate UserId and BranchId foreign keys with the portal's core identity tables. */
-
-IF NOT EXISTS (SELECT 1 FROM sys.schemas WHERE name = 'utl')
-  EXEC('CREATE SCHEMA utl');
+/* CBC Utility Tracker — SQL Server unified archetype schema.
+   VAT, totals, BDT conversion and prior-period delta MUST be calculated by the
+   application service in one transaction; clients never submit trusted totals. */
+IF NOT EXISTS (SELECT 1 FROM sys.schemas WHERE name='utl') EXEC('CREATE SCHEMA utl');
 GO
-
-CREATE TABLE utl.BranchSettings (
-  BranchId          INT PRIMARY KEY,
-  BranchCode        NVARCHAR(30) NOT NULL UNIQUE,
-  BranchName        NVARCHAR(180) NOT NULL,
-  RegionName        NVARCHAR(120) NULL,
-  GeneratorFuelRate DECIMAL(12,4) NOT NULL DEFAULT (3.5),
-  IsActive          BIT NOT NULL DEFAULT (1),
-  UpdatedUtc        DATETIME2(0) NOT NULL DEFAULT (SYSUTCDATETIME()),
-  CONSTRAINT CK_Utility_FuelRate CHECK (GeneratorFuelRate >= 0)
+CREATE TABLE utl.Branch (
+  BranchId INT IDENTITY PRIMARY KEY, Code NVARCHAR(30) NOT NULL UNIQUE,
+  Name NVARCHAR(180) NOT NULL, EntityType NVARCHAR(12) NOT NULL,
+  Region NVARCHAR(120) NULL, IsActive BIT NOT NULL DEFAULT 1,
+  CONSTRAINT CK_UtlBranch_Type CHECK(EntityType IN ('BRANCH','DEPARTMENT'))
 );
 GO
-
-CREATE TABLE utl.GeneratorRun (
-  GeneratorRunId BIGINT IDENTITY(1,1) PRIMARY KEY,
-  BranchId       INT NOT NULL,
-  RunDate        DATE NOT NULL,
-  StartTime      TIME(0) NOT NULL,
-  EndTime        TIME(0) NOT NULL,
-  RunHours       DECIMAL(12,2) NOT NULL,
-  EstimatedFuel  DECIMAL(18,2) NOT NULL DEFAULT (0),
-  ActualFuel     DECIMAL(18,2) NOT NULL DEFAULT (0),
-  Remarks        NVARCHAR(1000) NULL,
-  EnteredByUserId BIGINT NOT NULL,
-  EnteredUtc     DATETIME2(0) NOT NULL DEFAULT (SYSUTCDATETIME()),
-  CONSTRAINT FK_GeneratorRun_Branch FOREIGN KEY (BranchId) REFERENCES utl.BranchSettings(BranchId),
-  CONSTRAINT CK_GeneratorRun_Hours CHECK (RunHours >= 0),
-  CONSTRAINT CK_GeneratorRun_Fuel CHECK (EstimatedFuel >= 0 AND ActualFuel >= 0)
+CREATE TABLE utl.UtilityType (
+  UtilityTypeId INT IDENTITY PRIMARY KEY, Code NVARCHAR(50) NOT NULL UNIQUE,
+  Name NVARCHAR(180) NOT NULL, Archetype NVARCHAR(12) NOT NULL,
+  DefaultVatRate DECIMAL(9,4) NOT NULL DEFAULT 0, Currency CHAR(3) NOT NULL DEFAULT 'BDT',
+  RequiresConversion BIT NOT NULL DEFAULT 0, OwningDepartment NVARCHAR(180) NOT NULL,
+  IsActive BIT NOT NULL DEFAULT 1,
+  CONSTRAINT CK_UtlType_Archetype CHECK(Archetype IN ('SIMPLE','METERED','ASSET','SERVICE','COMPOSITE')),
+  CONSTRAINT CK_UtlType_Vat CHECK(DefaultVatRate BETWEEN 0 AND 100)
 );
 GO
-CREATE INDEX IX_GeneratorRun_Branch_Date ON utl.GeneratorRun(BranchId, RunDate DESC);
-GO
-
-CREATE TABLE utl.FuelPurchase (
-  FuelPurchaseId BIGINT IDENTITY(1,1) PRIMARY KEY,
-  BranchId       INT NOT NULL,
-  PurchaseDate   DATE NOT NULL,
-  QuantityLitres DECIMAL(18,2) NOT NULL,
-  RatePerLitre   DECIMAL(18,2) NOT NULL,
-  Amount         AS (QuantityLitres * RatePerLitre) PERSISTED,
-  VendorName     NVARCHAR(240) NOT NULL,
-  Remarks        NVARCHAR(1000) NULL,
-  EnteredByUserId BIGINT NOT NULL,
-  EnteredUtc     DATETIME2(0) NOT NULL DEFAULT (SYSUTCDATETIME()),
-  CONSTRAINT FK_FuelPurchase_Branch FOREIGN KEY (BranchId) REFERENCES utl.BranchSettings(BranchId),
-  CONSTRAINT CK_FuelPurchase_QtyRate CHECK (QuantityLitres > 0 AND RatePerLitre > 0)
+CREATE TABLE utl.Bill (
+  BillId BIGINT IDENTITY PRIMARY KEY, BranchId INT NOT NULL, UtilityTypeId INT NOT NULL,
+  PeriodType NVARCHAR(10) NOT NULL, PeriodStart DATE NOT NULL, PeriodEnd DATE NOT NULL,
+  Currency CHAR(3) NOT NULL, ConversionRate DECIMAL(19,6) NOT NULL DEFAULT 1,
+  Subtotal DECIMAL(19,2) NOT NULL, VatRate DECIMAL(9,4) NOT NULL,
+  VatAmount DECIMAL(19,2) NOT NULL, OtherCharges DECIMAL(19,2) NOT NULL DEFAULT 0,
+  GrandTotal DECIMAL(19,2) NOT NULL, GrandTotalBdt DECIMAL(19,2) NOT NULL,
+  PreviousAmount DECIMAL(19,2) NOT NULL DEFAULT 0, DeltaAmount DECIMAL(19,2) NOT NULL DEFAULT 0,
+  Source NVARCHAR(10) NOT NULL, ReferenceNo NVARCHAR(120) NULL, Remarks NVARCHAR(1000) NULL,
+  CreatedByUserId BIGINT NOT NULL, CreatedUtc DATETIME2(0) NOT NULL DEFAULT SYSUTCDATETIME(),
+  UpdatedUtc DATETIME2(0) NOT NULL DEFAULT SYSUTCDATETIME(), IsDeleted BIT NOT NULL DEFAULT 0,
+  DeletedUtc DATETIME2(0) NULL,
+  CONSTRAINT FK_UtlBill_Branch FOREIGN KEY(BranchId) REFERENCES utl.Branch(BranchId),
+  CONSTRAINT FK_UtlBill_Type FOREIGN KEY(UtilityTypeId) REFERENCES utl.UtilityType(UtilityTypeId),
+  CONSTRAINT CK_UtlBill_Period CHECK(PeriodType IN ('MONTH','QUARTER') AND PeriodEnd>=PeriodStart),
+  CONSTRAINT CK_UtlBill_Source CHECK(Source IN ('MANUAL','IMPORT')),
+  CONSTRAINT CK_UtlBill_Values CHECK(ConversionRate>0 AND Subtotal>=0 AND VatRate BETWEEN 0 AND 100 AND VatAmount>=0 AND OtherCharges>=0 AND GrandTotal>=0 AND GrandTotalBdt>=0)
 );
 GO
-CREATE INDEX IX_FuelPurchase_Branch_Date ON utl.FuelPurchase(BranchId, PurchaseDate DESC);
+CREATE UNIQUE INDEX UX_UtlBill_Period ON utl.Bill(BranchId,UtilityTypeId,PeriodStart,PeriodEnd) WHERE IsDeleted=0;
+CREATE INDEX IX_UtlBill_Reporting ON utl.Bill(PeriodStart,UtilityTypeId,BranchId) INCLUDE(GrandTotalBdt,DeltaAmount) WHERE IsDeleted=0;
 GO
-
-CREATE TABLE utl.ElectricityBill (
-  ElectricityBillId BIGINT IDENTITY(1,1) PRIMARY KEY,
-  BranchId          INT NOT NULL,
-  BillMonth         DATE NOT NULL,
-  ConsumptionKwh    DECIMAL(18,2) NOT NULL,
-  RatePerKwh        DECIMAL(18,4) NOT NULL,
-  Amount            AS (ConsumptionKwh * RatePerKwh) PERSISTED,
-  Remarks           NVARCHAR(1000) NULL,
-  EnteredByUserId   BIGINT NOT NULL,
-  EnteredUtc        DATETIME2(0) NOT NULL DEFAULT (SYSUTCDATETIME()),
-  CONSTRAINT FK_ElectricityBill_Branch FOREIGN KEY (BranchId) REFERENCES utl.BranchSettings(BranchId),
-  CONSTRAINT UQ_ElectricityBill_BranchMonth UNIQUE (BranchId, BillMonth),
-  CONSTRAINT CK_ElectricityBill_Month CHECK (DAY(BillMonth) = 1),
-  CONSTRAINT CK_ElectricityBill_Values CHECK (ConsumptionKwh >= 0 AND RatePerKwh >= 0)
+CREATE TABLE utl.BillLineItem (
+  LineId BIGINT IDENTITY PRIMARY KEY, BillId BIGINT NOT NULL, LineOrder INT NOT NULL,
+  Label NVARCHAR(240) NOT NULL, Meta NVARCHAR(MAX) NOT NULL,
+  Amount DECIMAL(19,2) NOT NULL,
+  CONSTRAINT FK_UtlLine_Bill FOREIGN KEY(BillId) REFERENCES utl.Bill(BillId),
+  CONSTRAINT CK_UtlLine_Json CHECK(ISJSON(Meta)=1), CONSTRAINT CK_UtlLine_Amount CHECK(Amount>=0),
+  CONSTRAINT UQ_UtlLine_Order UNIQUE(BillId,LineOrder)
 );
 GO
-
-CREATE TABLE utl.WasaBill (
-  WasaBillId       BIGINT IDENTITY(1,1) PRIMARY KEY,
-  BranchId        INT NOT NULL,
-  BillMonth       DATE NOT NULL,
-  ConsumptionUnit DECIMAL(18,2) NOT NULL,
-  RatePerUnit     DECIMAL(18,4) NOT NULL,
-  Amount          AS (ConsumptionUnit * RatePerUnit) PERSISTED,
-  Remarks         NVARCHAR(1000) NULL,
-  EnteredByUserId BIGINT NOT NULL,
-  EnteredUtc      DATETIME2(0) NOT NULL DEFAULT (SYSUTCDATETIME()),
-  CONSTRAINT FK_WasaBill_Branch FOREIGN KEY (BranchId) REFERENCES utl.BranchSettings(BranchId),
-  CONSTRAINT UQ_WasaBill_BranchMonth UNIQUE (BranchId, BillMonth),
-  CONSTRAINT CK_WasaBill_Month CHECK (DAY(BillMonth) = 1),
-  CONSTRAINT CK_WasaBill_Values CHECK (ConsumptionUnit >= 0 AND RatePerUnit >= 0)
+CREATE TABLE utl.BillAttachment (
+  AttachmentId BIGINT IDENTITY PRIMARY KEY, BillId BIGINT NOT NULL,
+  FilePath NVARCHAR(1000) NOT NULL, OriginalFileName NVARCHAR(260) NOT NULL,
+  ContentType NVARCHAR(120) NOT NULL, FileSizeBytes BIGINT NOT NULL, IsSourceScan BIT NOT NULL DEFAULT 1,
+  UploadedUtc DATETIME2(0) NOT NULL DEFAULT SYSUTCDATETIME(),
+  CONSTRAINT FK_UtlAttachment_Bill FOREIGN KEY(BillId) REFERENCES utl.Bill(BillId)
 );
 GO
-
-CREATE TABLE utl.DrinkingWaterDelivery (
-  DeliveryId      BIGINT IDENTITY(1,1) PRIMARY KEY,
-  BranchId       INT NOT NULL,
-  DeliveryDate   DATE NOT NULL,
-  QuantityLitres DECIMAL(18,2) NOT NULL,
-  VendorName     NVARCHAR(240) NOT NULL,
-  Remarks        NVARCHAR(1000) NULL,
-  EnteredByUserId BIGINT NOT NULL,
-  EnteredUtc     DATETIME2(0) NOT NULL DEFAULT (SYSUTCDATETIME()),
-  CONSTRAINT FK_WaterDelivery_Branch FOREIGN KEY (BranchId) REFERENCES utl.BranchSettings(BranchId),
-  CONSTRAINT CK_WaterDelivery_Qty CHECK (QuantityLitres > 0)
+CREATE TABLE utl.UserRole (
+  UserRoleId BIGINT IDENTITY PRIMARY KEY, UserId BIGINT NOT NULL,
+  RoleCode NVARCHAR(20) NOT NULL, IsActive BIT NOT NULL DEFAULT 1,
+  CONSTRAINT CK_UtlRole CHECK(RoleCode IN ('ADMIN','DATA_ENTRY','VIEWER')),
+  CONSTRAINT UQ_UtlUserRole UNIQUE(UserId,RoleCode)
 );
 GO
-CREATE INDEX IX_WaterDelivery_Branch_Date ON utl.DrinkingWaterDelivery(BranchId, DeliveryDate DESC);
-GO
-
-CREATE TABLE utl.DrinkingWaterBill (
-  WaterBillId     BIGINT IDENTITY(1,1) PRIMARY KEY,
-  BranchId       INT NOT NULL,
-  BillMonth      DATE NOT NULL,
-  QuantityLitres DECIMAL(18,2) NOT NULL,
-  Amount         DECIMAL(19,2) NOT NULL,
-  Remarks        NVARCHAR(1000) NULL,
-  EnteredByUserId BIGINT NOT NULL,
-  EnteredUtc     DATETIME2(0) NOT NULL DEFAULT (SYSUTCDATETIME()),
-  CONSTRAINT FK_WaterBill_Branch FOREIGN KEY (BranchId) REFERENCES utl.BranchSettings(BranchId),
-  CONSTRAINT UQ_WaterBill_BranchMonth UNIQUE (BranchId, BillMonth),
-  CONSTRAINT CK_WaterBill_Month CHECK (DAY(BillMonth) = 1),
-  CONSTRAINT CK_WaterBill_Values CHECK (QuantityLitres > 0 AND Amount >= 0)
-);
-GO
-
-CREATE TABLE utl.UserBranchAssignment (
-  AssignmentId BIGINT IDENTITY(1,1) PRIMARY KEY,
-  UserId       BIGINT NOT NULL,
-  EmployeeId   NVARCHAR(40) NOT NULL,
-  FullName     NVARCHAR(180) NOT NULL,
-  Email        NVARCHAR(320) NOT NULL,
-  RoleCode     NVARCHAR(30) NOT NULL,
-  BranchId     INT NULL,
-  IsActive     BIT NOT NULL DEFAULT (1),
-  CreatedUtc   DATETIME2(0) NOT NULL DEFAULT (SYSUTCDATETIME()),
-  UpdatedUtc   DATETIME2(0) NOT NULL DEFAULT (SYSUTCDATETIME()),
-  CONSTRAINT FK_UtilityAssignment_Branch FOREIGN KEY (BranchId) REFERENCES utl.BranchSettings(BranchId),
-  CONSTRAINT UQ_UtilityAssignment UNIQUE (UserId, BranchId, RoleCode)
-);
-GO
-
 CREATE TABLE utl.AuditLog (
-  AuditId       BIGINT IDENTITY(1,1) PRIMARY KEY,
-  OccurredUtc   DATETIME2(0) NOT NULL DEFAULT (SYSUTCDATETIME()),
-  UserId        BIGINT NULL,
-  UserEmail     NVARCHAR(320) NOT NULL,
-  ActionCode    NVARCHAR(80) NOT NULL,
-  EntityType    NVARCHAR(80) NULL,
-  EntityId      NVARCHAR(100) NULL,
-  Detail        NVARCHAR(2000) NOT NULL,
-  CorrelationId UNIQUEIDENTIFIER NOT NULL DEFAULT (NEWID())
+  AuditId BIGINT IDENTITY PRIMARY KEY, OccurredUtc DATETIME2(0) NOT NULL DEFAULT SYSUTCDATETIME(),
+  UserId BIGINT NULL, ActionCode NVARCHAR(80) NOT NULL, EntityType NVARCHAR(80) NULL,
+  EntityId NVARCHAR(100) NULL, Detail NVARCHAR(2000) NOT NULL, CorrelationId UNIQUEIDENTIFIER NOT NULL DEFAULT NEWID()
 );
-GO
-CREATE INDEX IX_UtilityAudit_Occurred ON utl.AuditLog(OccurredUtc DESC);
 GO

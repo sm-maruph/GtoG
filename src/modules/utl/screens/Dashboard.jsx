@@ -1,32 +1,5 @@
-import { Factory, Fuel, PlugZap, Droplets, GlassWater, Clock3 } from 'lucide-react';
+import { Banknote, Building2, ReceiptText, TrendingUp } from 'lucide-react';
 import { useUtility } from '../UtlContext';
-import { formatMoney, number } from '../format';
-import MiniBars from '../components/MiniBars';
 import { UtlCard, UtlPage, UtlStat } from '../components/UtlUI';
-
-export default function Dashboard(){
-  const { stats, branchFilter, state } = useUtility();
-  const branch = branchFilter==='ALL'?'All branches':state.branches.find(b=>b.code===branchFilter)?.name;
-  const labels = stats.months.map(m=>m.slice(5));
-  return <UtlPage title="Utility Dashboard" subtitle={`Operational overview · ${branch}`}>
-    <div className="utl-section-label"><Factory size={15}/> Generator</div>
-    <div className="utl-stat-grid">
-      <UtlStat icon={<Fuel size={18}/>} label="Fuel in hand" value={`${number(stats.generator.fuelInHand)} L`} hint="Estimated 90-day balance"/>
-      <UtlStat icon={<Clock3 size={18}/>} label="Run hours · 7 days" value={`${number(stats.generator.weeklyHours)} h`} tone="green"/>
-      <UtlStat icon={<Factory size={18}/>} label="Run hours · 30 days" value={`${number(stats.generator.monthlyHours)} h`} tone="orange"/>
-      <UtlStat icon={<Fuel size={18}/>} label="Fuel used · 30 days" value={`${number(stats.generator.monthlyFuel)} L`} tone="purple"/>
-    </div>
-    <div className="utl-dashboard-grid">
-      <UtlCard title="Generator — 12-month fuel purchased"><MiniBars labels={labels} values={stats.fuelTrend} format={v=>`${number(v,0)}L`}/></UtlCard>
-      <UtlCard title="Electricity — 12-month billing"><MiniBars labels={labels} values={stats.electricTrend} format={formatMoney}/></UtlCard>
-      <UtlCard title="WASA — 12-month billing"><MiniBars labels={labels} values={stats.wasaTrend} format={formatMoney}/></UtlCard>
-      <UtlCard title="Drinking Water — deliveries"><MiniBars labels={labels} values={stats.waterDeliveryTrend} format={v=>`${number(v,0)}L`}/></UtlCard>
-    </div>
-    <div className="utl-section-label"><PlugZap size={15}/> Current position</div>
-    <div className="utl-stat-grid utl-stat-grid-three">
-      <UtlStat icon={<PlugZap size={18}/>} label="Latest electric bill" value={formatMoney(stats.electricity.lastBill)} tone="blue"/>
-      <UtlStat icon={<Droplets size={18}/>} label="Latest WASA bill" value={formatMoney(stats.wasa.lastBill)} tone="teal"/>
-      <UtlStat icon={<GlassWater size={18}/>} label="Drinking water billed" value={formatMoney(stats.water.amount)} tone="green"/>
-    </div>
-  </UtlPage>;
-}
+const money=v=>new Intl.NumberFormat('en-BD',{style:'currency',currency:'BDT',maximumFractionDigits:0}).format(Number(v)||0);
+export default function Dashboard(){const {state,branchFilter}=useUtility();const bills=(state.bills||[]).filter(b=>!b.deletedAt&&(branchFilter==='ALL'||b.branchCode===branchFilter));const month=new Date().toISOString().slice(0,7),current=bills.filter(b=>b.periodStart.slice(0,7)===month),total=current.reduce((s,b)=>s+b.grandTotalBdt,0),delta=current.reduce((s,b)=>s+b.deltaAmount,0),recovery=current.flatMap(b=>b.archetype==='ASSET'?b.lines:[]).reduce((s,l)=>s+Number(l.userExpense||0),0);return <UtlPage title="Utility Control Center" subtitle="One archetype-driven ledger for every branch, department and utility bill."><div className="utl-stat-grid"><UtlStat icon={<Banknote size={18}/>} label="Current Payable" value={money(total)}/><UtlStat icon={<ReceiptText size={18}/>} label="Bills This Month" value={current.length} tone="green"/><UtlStat icon={<TrendingUp size={18}/>} label="Net Variance" value={`${delta>=0?'+':''}${money(delta)}`} tone="orange"/><UtlStat icon={<Building2 size={18}/>} label="Staff Recovery" value={money(recovery)} tone="purple"/></div><UtlCard title="Recent Unified Bills"><div className="utl-table-wrap"><table className="utl-table"><thead><tr><th>Period</th><th>Branch</th><th>Utility</th><th>Archetype</th><th>Source</th><th>Payable BDT</th><th>Delta</th></tr></thead><tbody>{bills.slice(0,15).map(b=><tr key={b.id}><td>{b.periodStart} — {b.periodEnd}</td><td>{b.branchName}</td><td>{state.utilityTypes.find(t=>t.id===b.utilityTypeId)?.name}</td><td>{b.archetype}</td><td>{b.source}</td><td>{money(b.grandTotalBdt)}</td><td className={b.deltaAmount>0?'utl-delta-up':'utl-delta-down'}>{b.deltaAmount>0?'+':''}{money(b.deltaAmount)}</td></tr>)}{!bills.length&&<tr><td colSpan="7">No unified bills yet. Open a utility tab to enter or import the first bill.</td></tr>}</tbody></table></div></UtlCard></UtlPage>}

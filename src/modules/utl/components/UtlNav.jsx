@@ -1,20 +1,18 @@
 import { NavLink } from 'react-router-dom';
-import { Droplets, Factory, Gauge, LogOut, PlugZap, UsersRound, GlassWater } from 'lucide-react';
+import { Gauge, LogOut, UsersRound, ReceiptText, ChartNoAxesCombined } from 'lucide-react';
 import { useAuth } from '../../../core/auth/AuthContext';
 import { useUtility } from '../UtlContext';
 import logo from '../../../assets/small_logo.jpg';
 
 const links = [
   { to:'/utility', end:true, label:'Dashboard', icon:Gauge },
-  { to:'/utility/generator', label:'Generator', icon:Factory },
-  { to:'/utility/electricity', label:'Electricity', icon:PlugZap },
-  { to:'/utility/wasa', label:'WASA', icon:Droplets },
-  { to:'/utility/water', label:'Drinking Water', icon:GlassWater },
 ];
 export default function UtlNav(){
   const { isAdmin, state, branchFilter, setBranchFilter } = useUtility();
   const { user, logout } = useAuth();
-  const all = isAdmin ? [...links,{to:'/utility/admin',label:'Admin',icon:UsersRound}] : links;
+  const custom=(state.utilityTypes||[]).filter(t=>t.active||isAdmin).map(t=>({to:`/utility/register/${t.id}`,label:t.name,icon:ReceiptText}));
+  const reports={to:'/utility/reports',label:'Management Reports',icon:ChartNoAxesCombined};
+  const all = isAdmin ? [...links,...custom,reports,{to:'/utility/admin',label:'Admin',icon:UsersRound}] : [...links,...custom,reports];
   return <aside className="utl-sidebar">
     <div className="utl-brand"><span className="utl-brand-icon"><img src={logo} alt="CBC logo" /></span><div><strong>Utility Tracker</strong><small>combankbd.com</small></div></div>
     <div className="utl-user-card"><span className="utl-avatar">{(user?.displayName||'?').split(/\s+/).map(x=>x[0]).slice(0,2).join('')}</span><div><strong>{user?.displayName}</strong><small>{isAdmin?'Administrator':'Branch User'}</small></div></div>
